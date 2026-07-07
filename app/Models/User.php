@@ -1,58 +1,121 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail; // 1. Import ini
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Translatable\HasTranslations;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasTranslations;
+    use HasFactory, HasTranslations, Notifiable, TwoFactorAuthenticatable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'profile_photo', 'timezone', 'locale', 'preferences'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'referral_code',
+        'referred_by',
+        'wallet_balance',
+        'profile_photo',
+        'timezone',
+        'locale',
+        'preferences',
+        'google_id',
+        'onboarded_at',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
-    // Tambahkan casting
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'onboarded_at' => 'datetime',
         'password' => 'hashed',
-        'preferences' => 'array', // PENTING: Cast ke array
+        'wallet_balance' => 'decimal:2',
+        'preferences' => 'array',
         'timezone' => 'string',
         'locale' => 'string',
     ];
 
-    // Relasi: Penulis punya banyak berita
-    public function news()
+    // ==========================================
+    // RELATIONS
+    // ==========================================
+
+    /** Langganan paket milik user */
+    public function subscriptions(): HasMany
     {
-        return $this->hasMany(News::class, 'author_id');
+        return $this->hasMany(UserSubscription::class);
     }
 
-    // Relasi: User punya banyak komentar
-    public function comments()
+    public function payments(): HasMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Payment::class);
     }
 
-    // Helper check admin
-    public function isAdmin()
+    public function quizAttempts(): HasMany
     {
-        return $this->role === 'admin';
+        return $this->hasMany(UserQuizAttempt::class);
+    }
+
+    /** Komisi yang diterima user ini sebagai referrer */
+    public function referralCommissions(): HasMany
+    {
+        return $this->hasMany(AffiliateCommission::class, 'referrer_id');
+    }
+
+    /** User yang mengundang user ini (dari ?ref= saat registrasi) */
+    public function referrer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    public function withdrawals(): HasMany
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
+
+    // ==========================================
+    // HELPERS (query sederhana, bukan business logic)
+    // ==========================================
+
+    /** Cek apakah user memegang langganan aktif untuk sebuah paket (gate akses konten) */
+    public function hasActiveSubscription(Package|int $package): bool
+    {
+        $packageId = $package instanceof Package ? $package->id : $package;
+
+        return $this->subscriptions()
+            ->where('package_id', $packageId)
+            ->active()
+            ->exists();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    /** User baru diarahkan ke onboarding sampai menyelesaikan/melewatinya */
+    public function hasOnboarded(): bool
+    {
+        return $this->onboarded_at !== null;
     }
 
     /**
      * Helper untuk mengambil inisial nama (Untuk profile_photo).
      * Contoh: "Budi Santoso" -> "BS", "Admin" -> "AD"
      */
-    public function initials()
+    public function initials(): string
     {
         $words = explode(' ', $this->name);
 
         // Jika nama terdiri dari 2 kata atau lebih (Contoh: Budi Santoso)
         if (count($words) >= 2) {
-            return strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1));
+            return strtoupper(substr($words[0], 0, 1).substr(end($words), 0, 1));
         }
 
         // Jika hanya 1 kata (Contoh: Admin), ambil 2 huruf pertama

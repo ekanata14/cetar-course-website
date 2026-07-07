@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\PaymentStatus;
+use App\Models\Package;
+use App\Models\Payment;
+use App\Models\Quiz;
 use App\Models\User;
-use App\Models\Project;
-use App\Models\Jobdesk;
-use App\Models\Attendance;
-use App\Models\Announcement;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Component;
 
 #[Layout('layouts.app')]
 #[Title('Admin Dashboard')]
@@ -17,14 +17,17 @@ class Dashboard extends Component
 {
     public function render()
     {
-        // 1. STATISTIK UTAMA
+        // Statistik utama platform
         $stats = [
-            'total_staff' => User::where('role', 'staff')->count(),
+            'total_users' => User::where('role', 'user')->count(),
+            'active_packages' => Package::active()->count(),
+            'total_quizzes' => Quiz::count(),
+            // Pendapatan = total pembayaran yang sudah settled
+            'revenue' => Payment::where('status', PaymentStatus::Settled)->sum('amount'),
         ];
 
-        // 4. USER TERBARU
+        // User terbaru untuk tabel ringkas
         $recentUsers = User::latest()->take(5)->get();
-
 
         return view('livewire.admin.dashboard', [
             'stats' => $stats,

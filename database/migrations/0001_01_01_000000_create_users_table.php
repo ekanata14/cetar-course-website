@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -17,6 +18,8 @@ return new class extends Migration {
             $table->string('password');
             $table->string('profile_photo')->nullable();
             $table->enum('role', ['super_admin', 'user'])->default('user');
+            $table->string('referral_code')->nullable()->unique(); // Kode afiliasi milik user (di-generate saat registrasi)
+            $table->decimal('wallet_balance', 12, 2)->default(0); // Saldo komisi afiliasi
             $table->string('locale', 5)->default('id'); // id, en, jp
             $table->string('timezone')->nullable();
             $table->json('preferences')->nullable(); // Dark mode, notif, dll
@@ -24,8 +27,6 @@ return new class extends Migration {
             $table->rememberToken(); // Add this line
             $table->timestamps();
         });
-
-
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();

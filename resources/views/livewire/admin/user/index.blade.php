@@ -60,7 +60,13 @@
                         <tr wire:key="{{ $user->id }}">
                             <th>{{ $loop->iteration + ($users->firstItem() - 1) }}</th>
                             <td>
-                                <x-avatar :image="$user->profile_photo ? asset('storage/' . $user->profile_photo) : null" class="!w-10 !h-10" />
+                                @if ($user->profile_photo)
+                                    <x-avatar :image="asset('storage/' . $user->profile_photo)" class="!w-10 !h-10" />
+                                @else
+                                    <div class="w-10 h-10 rounded-full brand-grad text-white flex items-center justify-center text-xs font-extrabold">
+                                        {{ $user->initials() }}
+                                    </div>
+                                @endif
                             </td>
                             <td>
                                 <div class="font-bold">{{ $user->name }}</div>
@@ -69,10 +75,10 @@
                                 <div class="flex flex-col gap-1 items-start">
                                     <div
                                         class="badge {{ match ($user->role) {
-                                            'super_admin' => 'badge-error text-white',
-                                            'pm' => 'badge-warning text-white',
-                                            'freelance' => 'badge-secondary text-white',
-                                            default => 'badge-info text-white',
+                                            'super_admin' => 'bg-secondary text-white border-0',
+                                            'pm' => 'bg-primary text-white border-0',
+                                            'freelance' => 'bg-primary/10 text-primary-dark border border-primary/20',
+                                            default => 'bg-secondary/10 text-secondary border border-secondary/10',
                                         } }} badge-sm">
                                         {{ str_replace('_', ' ', ucfirst($user->role)) }}
                                     </div>
@@ -95,7 +101,7 @@
                             </td>
                             <td class="text-right">
                                 <x-button icon="o-pencil-square" wire:click="edit({{ $user->id }})"
-                                    class="btn-sm btn-ghost text-blue-500" />
+                                    class="btn-sm btn-ghost text-primary" />
                                 @if ($user->id !== auth()->id())
                                     <x-button icon="o-trash" wire:click="confirmDelete({{ $user->id }})"
                                         class="btn-sm btn-square btn-ghost text-red-500" />

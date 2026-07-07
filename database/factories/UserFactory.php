@@ -27,7 +27,11 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'onboarded_at' => now(), // Default: user lama; pakai notOnboarded() untuk user baru
             'password' => static::$password ??= Hash::make('password'),
+            'role' => 'user',
+            'referral_code' => strtoupper(Str::random(8)), // Kode afiliasi unik untuk data seed/test
+            'wallet_balance' => 0,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -42,6 +46,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * User baru yang belum melewati onboarding.
+     */
+    public function notOnboarded(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'onboarded_at' => null,
         ]);
     }
 

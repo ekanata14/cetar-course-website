@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,12 +31,17 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
+        // Super Admin melewati semua pemeriksaan Policy/Gate (lihat system_architecture.md)
+        \Illuminate\Support\Facades\Gate::before(
+            fn ($user) => $user->isAdmin() ? true : null,
+        );
+
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
 
         Password::defaults(
-            fn(): ?Password => app()->isProduction()
+            fn (): ?Password => app()->isProduction()
             ? Password::min(12)
                 ->mixedCase()
                 ->letters()
@@ -46,10 +51,11 @@ class AppServiceProvider extends ServiceProvider
             : null
         );
 
-        Relation::morphMap([
-            'revision' => 'App\Models\RevisionThread',
-            'report' => 'App\Models\JobdeskReport',
-            // 'jobdesk' => 'App\Models\Jobdesk', // Jika jobdesk punya attachment langsung
+        // Morph map untuk semua relasi polimorfik: pivot `package_content` dan notifiable pada notifications.
+        // enforceMorphMap memastikan tidak ada FQCN yang bocor ke kolom *_type di database.
+        Relation::enforceMorphMap([
+            'user' => \App\Models\User::class,
+            'quiz' => \App\Models\Quiz::class,
         ]);
     }
 }

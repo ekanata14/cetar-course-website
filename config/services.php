@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    // DOKU Checkout (Jokul) — kosongkan kredensial = mode dev tanpa gateway
+    'doku' => [
+        'client_id' => env('DOKU_CLIENT_ID'),
+        'secret_key' => env('DOKU_SECRET_KEY'),
+        'base_url' => env('DOKU_BASE_URL', 'https://api-sandbox.doku.com'),
+    ],
+
+    // Google OAuth (Socialite) — login/registrasi dengan akun Google
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+    ],
+
 ];
