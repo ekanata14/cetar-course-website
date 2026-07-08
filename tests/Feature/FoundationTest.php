@@ -16,7 +16,7 @@ it('seeds the foundation data', function () {
     $this->seed(DatabaseSeeder::class);
 
     expect(User::where('role', 'super_admin')->count())->toBe(1)
-        ->and(User::count())->toBe(11)
+        ->and(User::count())->toBe(12) // 1 admin + 10 demo users + 1 demo pejuang (demo@cetar.id)
         ->and(Package::count())->toBe(2)
         ->and(PackagePlan::count())->toBe(4)
         ->and(Quiz::count())->toBe(2)
