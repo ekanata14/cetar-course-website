@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cetar — Try Out CPNS & SNBT Online</title>
+    <title>BIMBEL CETAR — Try Out CPNS & SNBT Online</title>
     <meta name="description" content="Platform try out CBT untuk persiapan CPNS dan UTBK-SNBT. Simulasi CAT, timer otomatis, penilaian per seksi, dan pembahasan lengkap.">
 
-    <link rel="icon" href="{{ asset('assets/images/logo_cetar.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('assets/images/logo_cetar.svg') }}" type="image/svg+xml">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800|jetbrains-mono:600,700,800&display=swap" rel="stylesheet" />
@@ -63,8 +63,8 @@
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
         <div class="container mx-auto px-6 lg:px-12 flex justify-between items-center h-16">
             <a href="#" class="flex items-center gap-3 font-extrabold text-xl tracking-tight text-cetar-navy">
-                <img src="{{ asset('assets/images/logo_cetar.png') }}" alt="Logo Cetar" class="w-9 h-9 object-contain" onerror="this.style.display='none';">
-                Cetar
+                <img src="{{ asset('assets/images/logo_cetar.svg') }}" alt="Logo BIMBEL CETAR" class="w-9 h-9 object-contain" onerror="this.style.display='none';">
+                BIMBEL CETAR
             </a>
             <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
                 <a href="#fitur" class="hover:text-cetar-orange transition">Fitur</a>
@@ -182,7 +182,7 @@
                 <h2 class="text-sm font-bold text-cetar-orange tracking-widest uppercase mb-2">Fitur Unggulan</h2>
                 <h3 class="text-3xl lg:text-4xl font-extrabold text-cetar-navy mb-4">Semua yang Kamu Butuhkan untuk Lolos</h3>
                 <p class="text-slate-600 text-lg">
-                    Bukan sekadar bank soal. Cetar mensimulasikan pengalaman ujian sesungguhnya dan membedah hasilmu sampai ke akar.
+                    Bukan sekadar bank soal. BIMBEL CETAR mensimulasikan pengalaman ujian sesungguhnya dan membedah hasilmu sampai ke akar.
                 </p>
             </div>
 
@@ -342,7 +342,7 @@
             <div class="max-w-2xl text-center lg:text-left">
                 <h3 class="text-2xl lg:text-3xl font-extrabold text-cetar-navy mb-3">Belajar Sambil Menghasilkan? Bisa.</h3>
                 <p class="text-slate-700 leading-relaxed">
-                    Ikut program afiliasi Cetar: bagikan kode referralmu ke teman seperjuangan, dapatkan komisi dari setiap pembelian paket, dan tarik saldomu langsung ke rekening bank.
+                    Ikut program afiliasi BIMBEL CETAR: bagikan kode referralmu ke teman seperjuangan, dapatkan komisi dari setiap pembelian paket, dan tarik saldomu langsung ke rekening bank.
                 </p>
             </div>
             <a href="{{ route('register') }}" class="px-8 py-4 rounded-xl bg-cetar-navy text-white font-bold shadow-lg hover:-translate-y-0.5 transition-all shrink-0">
@@ -356,8 +356,8 @@
         <div class="container mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
                 <div class="flex items-center gap-2 font-extrabold text-xl tracking-tight text-white justify-center md:justify-start">
-                    <img src="{{ asset('assets/images/logo_cetar.png') }}" alt="Logo Cetar" class="w-8 h-8 object-contain" onerror="this.style.display='none';">
-                    Cetar
+                    <img src="{{ asset('assets/images/logo_cetar.svg') }}" alt="Logo BIMBEL CETAR" class="w-8 h-8 object-contain" onerror="this.style.display='none';">
+                    BIMBEL CETAR
                 </div>
                 <p class="text-sm text-slate-400 mt-2 max-w-sm text-center md:text-left">
                     Platform try out CBT untuk persiapan CPNS dan UTBK-SNBT dengan simulasi CAT dan pembahasan lengkap.
@@ -370,7 +370,7 @@
                     <a href="{{ route('login') }}" class="hover:text-cetar-orange-soft transition">Masuk</a>
                     <a href="{{ route('register') }}" class="hover:text-cetar-orange-soft transition">Daftar</a>
                 </div>
-                <p class="text-xs text-slate-500">© {{ date('Y') }} Cetar. Semua hak dilindungi.</p>
+                <p class="text-xs text-slate-500">© {{ date('Y') }} BIMBEL CETAR. Semua hak dilindungi.</p>
             </div>
         </div>
     </footer>

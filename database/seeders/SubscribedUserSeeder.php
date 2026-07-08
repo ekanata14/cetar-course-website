@@ -8,6 +8,7 @@ use App\Enums\SubscriptionStatus;
 use App\Models\Package;
 use App\Models\Payment;
 use App\Models\User;
+use App\Models\UserProgress;
 use App\Models\UserQuizAnswer;
 use App\Models\UserQuizAttempt;
 use App\Models\UserSubscription;
@@ -106,6 +107,15 @@ class SubscribedUserSeeder extends Seeder
             }
 
             $attempt->update(['score' => $totalScore]);
+
+            // Konsistensi roadmap: semua item paket pertama (materi + try out) ditandai
+            // selesai, karena gerbang sekuensial mensyaratkan materi tuntas sebelum try out
+            foreach ($firstPackage->roadmapItems()->get() as $item) {
+                UserProgress::updateOrCreate(
+                    ['user_id' => $demo->id, 'roadmap_item_id' => $item->id],
+                    ['is_completed' => true, 'completed_at' => now()->subMinutes(30)],
+                );
+            }
         }
 
         $this->command->info('Login Demo User: demo@cetar.id / password');

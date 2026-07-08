@@ -13,14 +13,23 @@ use App\Models\UserSubscription;
 use Livewire\Livewire;
 
 /**
- * Helper: user berlangganan aktif + kuis terdistribusi ke paketnya.
+ * Helper: user berlangganan aktif + kuis terpasang di roadmap paketnya
+ * sebagai item pertama (otomatis terbuka menurut gerbang sekuensial).
  */
 function subscribedUserWithQuiz(int $questionCount = 3): array
 {
     $user = User::factory()->create();
     $package = Package::factory()->create();
     $quiz = Quiz::factory()->create(['duration_minutes' => 60]);
-    $quiz->packages()->attach($package);
+
+    $module = $package->modules()->create(['title' => 'Modul 1', 'order' => 1]);
+    $module->items()->create([
+        'contentable_type' => 'quiz',
+        'contentable_id' => $quiz->id,
+        'order' => 1,
+        'is_locked_by_default' => true, // Item pertama tetap terbuka
+    ]);
+
     Question::factory()->count($questionCount)->for($quiz)->create(['points' => 5]);
 
     UserSubscription::create([

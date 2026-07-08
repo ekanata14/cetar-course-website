@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Content;
 use App\Models\Package;
 use App\Models\Question;
 use App\Models\Quiz;
@@ -11,7 +12,8 @@ class QuizSeeder extends Seeder
 {
     /**
      * Seed kuis contoh dengan soal bersection (TWK/TIU/TKP & SNBT),
-     * lalu distribusikan ke paket via pivot polimorfik `package_content`.
+     * materi belajar (teks/video/PDF), lalu susun roadmap belajar per paket:
+     * Modul 1 = materi berurutan yang diakhiri try out.
      */
     public function run(): void
     {
@@ -51,13 +53,68 @@ class QuizSeeder extends Seeder
         }
 
         // ==========================================
-        // 3. Distribusi konten ke paket (morph pivot package_content)
+        // 3. Roadmap belajar per paket: Modul 1 berisi materi berurutan + try out di akhir
         // ==========================================
         $cpnsPackage = Package::where('slug', 'pejuang-cpns-2026')->first();
         $snbtPackage = Package::where('slug', 'juara-snbt-2026')->first();
 
-        $cpnsPackage?->quizzes()->attach($cpnsQuiz);
-        $snbtPackage?->quizzes()->attach($snbtQuiz);
+        if ($cpnsPackage) {
+            $this->seedRoadmap($cpnsPackage, $cpnsQuiz, 'SKD CPNS');
+        }
+
+        if ($snbtPackage) {
+            $this->seedRoadmap($snbtPackage, $snbtQuiz, 'UTBK-SNBT');
+        }
+    }
+
+    /**
+     * Susun "Modul 1 — Persiapan Dasar" untuk sebuah paket:
+     * teks pengantar (bebas) → video → PDF → try out, semua bergerbang berurutan.
+     */
+    private function seedRoadmap(Package $package, Quiz $quiz, string $label): void
+    {
+        $intro = Content::create([
+            'title' => "Pengantar {$label}: Strategi Belajar Efektif",
+            'type' => 'text',
+            'body' => "Selamat datang di perjalanan belajar {$label}!\n\n"
+                ."Materi di modul ini disusun berurutan: pelajari teks pengantar ini, tonton video pembahasan, "
+                ."baca rangkuman PDF, lalu uji kemampuanmu di try out.\n\n"
+                ."Tips: kerjakan try out dalam kondisi fokus dan tanpa gangguan, seperti ujian sesungguhnya. "
+                ."Setelah selesai, pelajari pembahasan setiap soal — di situlah peningkatan skor terjadi.",
+        ]);
+
+        $video = Content::create([
+            'title' => "Video: Bedah Kisi-Kisi {$label}",
+            'type' => 'video',
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // Placeholder — ganti via menu Materi
+        ]);
+
+        $pdf = Content::create([
+            'title' => "Rangkuman Materi {$label} (PDF)",
+            'type' => 'pdf',
+            'file_path' => null, // Unggah file asli via menu Materi
+        ]);
+
+        $module = $package->modules()->create([
+            'title' => 'Modul 1 — Persiapan Dasar',
+            'order' => 1,
+        ]);
+
+        $sequence = [
+            ['contentable' => $intro, 'type' => 'content', 'locked' => false], // Pintu masuk selalu terbuka
+            ['contentable' => $video, 'type' => 'content', 'locked' => true],
+            ['contentable' => $pdf, 'type' => 'content', 'locked' => true],
+            ['contentable' => $quiz, 'type' => 'quiz', 'locked' => true],     // Try out di ujung modul
+        ];
+
+        foreach ($sequence as $index => $entry) {
+            $module->items()->create([
+                'contentable_type' => $entry['type'],
+                'contentable_id' => $entry['contentable']->id,
+                'order' => $index + 1,
+                'is_locked_by_default' => $entry['locked'],
+            ]);
+        }
     }
 
     /**

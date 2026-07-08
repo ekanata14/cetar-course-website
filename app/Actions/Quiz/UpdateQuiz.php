@@ -17,9 +17,6 @@ class UpdateQuiz
                 'duration_minutes' => $data->durationMinutes,
             ]);
 
-            // sync = tambah paket baru, lepas paket yang di-uncheck
-            $quiz->packages()->sync($data->packageIds);
-
             return $quiz->refresh();
         });
     }

@@ -34,25 +34,38 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {{-- KOLOM KIRI: TRY OUT TERSEDIA --}}
+        {{-- KOLOM KIRI: PERJALANAN BELAJAR --}}
         <div class="lg:col-span-2 space-y-4">
-            <h2 class="font-extrabold tracking-tight text-lg text-secondary">{{ __('Try Out Tersedia') }}</h2>
+            <h2 class="font-extrabold tracking-tight text-lg text-secondary">{{ __('Perjalanan Belajarmu') }}</h2>
 
-            @forelse ($this->availableQuizzes as $quiz)
-                <x-ui.card hover class="flex items-center gap-4" wire:key="quiz-{{ $quiz->id }}">
-                    <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <x-lucide-file-text class="w-5 h-5" />
+            @forelse ($this->journeys as $journey)
+                <x-ui.card hover class="space-y-4" wire:key="journey-{{ $journey['package']->id }}">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <x-lucide-map class="w-5 h-5" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-secondary truncate">{{ $journey['package']->name }}</p>
+                            <p class="text-sm text-ink-muted">
+                                <span class="font-mono font-extrabold tabular-nums">{{ $journey['completed'] }}/{{ $journey['total'] }}</span>
+                                {{ __('materi & try out selesai') }}
+                            </p>
+                        </div>
+                        <x-ui.button variant="secondary" :href="route('user.journey', $journey['package'])" class="!px-4 !py-2.5 shrink-0">
+                            {{ $journey['completed'] > 0 ? __('Lanjutkan') : __('Mulai Belajar') }}
+                            <x-lucide-arrow-right class="w-4 h-4" />
+                        </x-ui.button>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-bold text-secondary truncate">{{ $quiz->title }}</p>
-                        <p class="text-sm text-ink-muted">
-                            {{ $quiz->questions_count }} {{ __('soal') }} ·
-                            <span class="font-mono font-extrabold tabular-nums">{{ $quiz->duration_minutes }}</span> {{ __('menit') }}
+
+                    {{-- Progress bar --}}
+                    <div class="space-y-1.5">
+                        <div class="h-2 rounded-full bg-surface-soft overflow-hidden">
+                            <div class="h-full brand-grad rounded-full transition-all duration-500" style="width: {{ $journey['percent'] }}%"></div>
+                        </div>
+                        <p class="text-[11px] font-semibold text-ink-muted text-right">
+                            <span class="font-mono tabular-nums">{{ $journey['percent'] }}%</span>
                         </p>
                     </div>
-                    <x-ui.button variant="secondary" :href="route('user.exam', $quiz)" class="!px-4 !py-2.5 shrink-0">
-                        {{ __('Mulai') }} <x-lucide-arrow-right class="w-4 h-4" />
-                    </x-ui.button>
                 </x-ui.card>
             @empty
                 {{-- Empty state: belum berlangganan paket --}}
@@ -60,9 +73,9 @@
                     <div class="w-14 h-14 mx-auto rounded-2xl bg-surface-soft text-ink-faint flex items-center justify-center mb-4">
                         <x-lucide-package-open class="w-6 h-6" />
                     </div>
-                    <p class="font-bold text-secondary">{{ __('Belum ada try out') }}</p>
+                    <p class="font-bold text-secondary">{{ __('Belum ada perjalanan belajar') }}</p>
                     <p class="text-sm text-ink-muted mt-1 mb-5">
-                        {{ __('Berlangganan paket untuk membuka semua try out dan materi.') }}
+                        {{ __('Berlangganan paket untuk membuka semua materi dan try out.') }}
                     </p>
                     <x-ui.button :href="route('user.packages')" class="mx-auto">
                         <x-lucide-sparkles class="w-4 h-4" /> {{ __('Lihat Paket') }}

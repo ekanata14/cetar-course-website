@@ -47,12 +47,12 @@
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex flex-wrap gap-1 max-w-[220px]">
-                                    @forelse ($quiz->packages as $package)
+                                    @forelse ($quiz->roadmapItems->pluck('module.package')->filter()->unique('id') as $package)
                                         <span class="text-[11px] font-semibold text-primary-dark bg-primary/10 px-2 py-0.5 rounded-full">
                                             {{ $package->name }}
                                         </span>
                                     @empty
-                                        <span class="text-xs text-ink-faint">{{ __('Belum didistribusikan') }}</span>
+                                        <span class="text-xs text-ink-faint">{{ __('Belum masuk roadmap') }}</span>
                                     @endforelse
                                 </div>
                             </td>
@@ -108,25 +108,10 @@
             <x-ui.input label="{{ __('Durasi (menit)') }}" name="durationMinutes" type="number"
                 wire:model="durationMinutes" min="1" max="600" />
 
-            {{-- DISTRIBUSI KE PAKET (morph pivot package_content) --}}
-            <div>
-                <p class="block text-sm font-semibold text-secondary mb-1.5">{{ __('Distribusikan ke Paket') }}</p>
-                <div class="space-y-2 max-h-44 overflow-y-auto p-3 rounded-xl bg-surface-tint">
-                    @forelse ($this->packageOptions as $package)
-                        <label class="flex items-center gap-2.5 cursor-pointer select-none"
-                            wire:key="pkg-option-{{ $package->id }}">
-                            <input type="checkbox" value="{{ $package->id }}" wire:model="packageIds"
-                                class="w-4 h-4 rounded accent-[#F5872A]">
-                            <span class="text-sm text-ink">{{ $package->name }}</span>
-                        </label>
-                    @empty
-                        <p class="text-sm text-ink-muted">{{ __('Belum ada paket — buat paket dulu di menu Paket.') }}</p>
-                    @endforelse
-                </div>
-                @error('packageIds')
-                    <p class="text-sm text-bad mt-1.5">{{ $message }}</p>
-                @enderror
-            </div>
+            {{-- Penempatan ke paket dilakukan lewat Roadmap Builder (menu Paket → Roadmap) --}}
+            <p class="text-xs text-ink-muted bg-surface-tint rounded-xl p-3">
+                {{ __('Untuk menampilkan kuis ini ke siswa, tambahkan ke roadmap paket lewat menu Paket → Roadmap.') }}
+            </p>
 
             {{-- FOOTER --}}
             <div class="flex items-center justify-end gap-2 pt-2">

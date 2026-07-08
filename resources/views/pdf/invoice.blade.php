@@ -43,7 +43,7 @@
         $isPending => ['stamp-pending', 'BELUM DIBAYAR'],
         default => ['stamp-void', strtoupper($payment->status->value === 'expired' ? 'KEDALUWARSA' : 'GAGAL')],
     };
-    $logo = public_path('assets/images/logo_cetar.png');
+    $logo = public_path('assets/images/logo_cetar.svg');
 @endphp
 <div class="page">
 
@@ -52,9 +52,9 @@
         <tr>
             <td width="55%">
                 @if (file_exists($logo))
-                    <img src="{{ $logo }}" alt="Cetar" width="44" style="margin-bottom: 8px;">
+                    <img src="{{ $logo }}" alt="BIMBEL CETAR" width="44" style="margin-bottom: 8px;">
                 @endif
-                <div class="navy" style="font-size: 20px; font-weight: bold;">Cetar</div>
+                <div class="navy" style="font-size: 20px; font-weight: bold;">BIMBEL CETAR</div>
                 <div class="muted" style="font-size: 10px; margin-top: 3px;">
                     Platform try out CBT persiapan CPNS &amp; UTBK-SNBT
                 </div>
@@ -72,7 +72,7 @@
         <tr>
             <td width="34%">
                 <div class="label">Diterbitkan Oleh</div>
-                <div class="navy" style="font-weight: bold; margin-top: 4px;">Cetar</div>
+                <div class="navy" style="font-weight: bold; margin-top: 4px;">BIMBEL CETAR</div>
                 <div class="muted" style="font-size: 10px; margin-top: 2px;">{{ config('app.url') }}</div>
             </td>
             <td width="33%">

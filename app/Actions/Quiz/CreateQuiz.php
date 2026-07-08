@@ -10,17 +10,13 @@ class CreateQuiz
 {
     public function execute(QuizData $data): Quiz
     {
+        // Penempatan ke paket dilakukan lewat Roadmap Builder, bukan di sini
         return DB::transaction(function () use ($data) {
-            $quiz = Quiz::create([
+            return Quiz::create([
                 'title' => $data->title,
                 'description' => $data->description,
                 'duration_minutes' => $data->durationMinutes,
             ]);
-
-            // Distribusikan ke paket-paket terpilih via morph pivot package_content
-            $quiz->packages()->sync($data->packageIds);
-
-            return $quiz;
         });
     }
 }

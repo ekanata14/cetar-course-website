@@ -18,43 +18,48 @@ test('quizzes page renders for super admin', function () {
         ->assertOk();
 });
 
-test('super admin can create a quiz attached to packages', function () {
-    $packages = Package::factory()->count(2)->create();
-
+test('super admin can create a quiz as a standalone question bank', function () {
     Livewire::actingAs($this->admin)
         ->test(Index::class)
         ->call('openCreate')
         ->set('title', 'Try Out SKD #99')
         ->set('durationMinutes', 100)
-        ->set('packageIds', $packages->pluck('id')->all())
         ->call('save')
         ->assertHasNoErrors();
 
     $quiz = Quiz::where('title', 'Try Out SKD #99')->first();
 
+    // Kuis lahir tanpa penempatan; masuk paket lewat Roadmap Builder
     expect($quiz)->not->toBeNull()
-        ->and($quiz->packages)->toHaveCount(2);
+        ->and($quiz->roadmapItems)->toHaveCount(0);
 });
 
-test('updating a quiz syncs its package distribution', function () {
-    $quiz = Quiz::factory()->create();
-    [$old, $new] = Package::factory()->count(2)->create();
-    $quiz->packages()->attach($old);
+test('updating a quiz changes its fields', function () {
+    $quiz = Quiz::factory()->create(['title' => 'Judul Lama', 'duration_minutes' => 60]);
 
     Livewire::actingAs($this->admin)
         ->test(Index::class)
         ->call('openEdit', $quiz->id)
-        ->set('packageIds', [$new->id])
+        ->set('title', 'Judul Baru')
+        ->set('durationMinutes', 90)
         ->call('save')
         ->assertHasNoErrors();
 
-    expect($quiz->refresh()->packages()->pluck('packages.id')->all())->toBe([$new->id]);
+    expect($quiz->refresh())
+        ->title->toBe('Judul Baru')
+        ->duration_minutes->toBe(90);
 });
 
-test('deleting a quiz removes its pivot rows and questions', function () {
+test('deleting a quiz removes its roadmap items and questions', function () {
     $quiz = Quiz::factory()->create();
     $package = Package::factory()->create();
-    $quiz->packages()->attach($package);
+    $module = $package->modules()->create(['title' => 'Modul 1', 'order' => 1]);
+    $module->items()->create([
+        'contentable_type' => 'quiz',
+        'contentable_id' => $quiz->id,
+        'order' => 1,
+        'is_locked_by_default' => true,
+    ]);
     $question = Question::factory()->for($quiz)->create();
 
     Livewire::actingAs($this->admin)
@@ -63,7 +68,7 @@ test('deleting a quiz removes its pivot rows and questions', function () {
 
     expect(Quiz::find($quiz->id))->toBeNull()
         ->and(Question::find($question->id))->toBeNull()
-        ->and($package->quizzes()->count())->toBe(0);
+        ->and($module->items()->count())->toBe(0);
 });
 
 test('questions page renders and lists sections', function () {

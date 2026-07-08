@@ -26,7 +26,7 @@ class Packages extends Component
     {
         return Package::active()
             ->with(['plans' => fn ($q) => $q->orderBy('duration_days')])
-            ->withCount('quizzes')
+            ->withCount(['quizItems as quizzes_count'])
             ->orderBy('name')
             ->get();
     }

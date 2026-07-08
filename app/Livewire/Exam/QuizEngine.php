@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Exam;
 
+use App\Actions\Quiz\CheckQuizAccess;
 use App\Actions\Quiz\SaveUserAnswer;
 use App\Actions\Quiz\StartQuizAttempt;
 use App\Actions\Quiz\SubmitQuizAttempt;
@@ -32,10 +33,13 @@ class QuizEngine extends Component
      */
     public array $answers = [];
 
-    public function mount(Quiz $quiz, StartQuizAttempt $start, SubmitQuizAttempt $submit): void
+    public function mount(Quiz $quiz, StartQuizAttempt $start, SubmitQuizAttempt $submit, CheckQuizAccess $access): void
     {
-        // GATE AKSES: user harus punya langganan aktif pada salah satu paket yang memuat kuis ini
-        abort_unless($this->userHasAccess($quiz), 403, 'Kamu belum berlangganan paket yang memuat try out ini.');
+        // GATE AKSES 1: user harus punya langganan aktif pada salah satu paket yang memuat kuis ini
+        abort_unless($access->subscribed(auth()->user(), $quiz), 403, 'Kamu belum berlangganan paket yang memuat try out ini.');
+
+        // GATE AKSES 2: item roadmap kuis ini harus sudah terbuka (materi sebelumnya selesai)
+        abort_unless($access->unlocked(auth()->user(), $quiz), 403, 'Selesaikan materi sebelumnya untuk membuka try out ini.');
 
         $this->quiz = $quiz;
 
@@ -145,17 +149,6 @@ class QuizEngine extends Component
         }
 
         $this->redirectRoute('user.exam.result', $this->attempt);
-    }
-
-    // --- HELPERS ---
-
-    private function userHasAccess(Quiz $quiz): bool
-    {
-        return auth()->user()
-            ->subscriptions()
-            ->active()
-            ->whereIn('package_id', $quiz->packages()->pluck('packages.id'))
-            ->exists();
     }
 
     public function render()

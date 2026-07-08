@@ -16,6 +16,7 @@ class QuestionData
         public string $correctAnswer,
         public int $points,
         public ?string $explanation,
+        public ?string $imageUrl = null,
     ) {}
 
     /**
@@ -28,6 +29,7 @@ class QuestionData
         return [
             'section' => $this->section,
             'passage' => $this->passage,
+            'image_url' => $this->imageUrl,
             'text' => $this->text,
             'option_a' => $this->optionA,
             'option_b' => $this->optionB,

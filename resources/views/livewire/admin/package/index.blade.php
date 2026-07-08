@@ -55,6 +55,11 @@
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex items-center justify-end gap-1">
+                                    {{-- Susun roadmap belajar (modul + urutan materi/try out) --}}
+                                    <a href="{{ route('admin.packages.roadmap', $package) }}"
+                                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-primary-dark bg-primary/10 hover:brand-grad hover:text-white transition-all">
+                                        <x-lucide-map class="w-4 h-4" /> {{ __('Roadmap') }}
+                                    </a>
                                     <button type="button" wire:click="openEdit({{ $package->id }})"
                                         class="p-2 rounded-lg text-secondary hover:bg-surface-soft transition-all cursor-pointer"
                                         aria-label="Edit">

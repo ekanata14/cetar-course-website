@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Package extends Model
 {
@@ -32,10 +32,28 @@ class Package extends Model
         return $this->hasMany(UserSubscription::class);
     }
 
-    /** Kuis yang terdistribusi ke paket ini via pivot polimorfik `package_content` */
-    public function quizzes(): MorphToMany
+    /** Modul roadmap belajar, sesuai urutan */
+    public function modules(): HasMany
     {
-        return $this->morphedByMany(Quiz::class, 'contentable', 'package_content')->withTimestamps();
+        return $this->hasMany(PackageModule::class)->orderBy('order');
+    }
+
+    /** Seluruh item roadmap paket ini (lintas modul) */
+    public function roadmapItems(): HasManyThrough
+    {
+        return $this->hasManyThrough(RoadmapItem::class, PackageModule::class, 'package_id', 'module_id');
+    }
+
+    /** Item roadmap bertipe kuis — dipakai untuk `withCount(['quizItems as quizzes_count'])` */
+    public function quizItems(): HasManyThrough
+    {
+        return $this->roadmapItems()->where('contentable_type', 'quiz');
+    }
+
+    /** Query kuis yang terdaftar di roadmap paket ini (pengganti relasi pivot lama) */
+    public function quizzes(): Builder
+    {
+        return Quiz::whereIn('id', $this->quizItems()->pluck('roadmap_items.contentable_id'));
     }
 
     public function scopeActive(Builder $query): Builder

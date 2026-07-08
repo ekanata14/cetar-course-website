@@ -20,7 +20,11 @@ it('seeds the foundation data', function () {
         ->and(Package::count())->toBe(2)
         ->and(PackagePlan::count())->toBe(4)
         ->and(Quiz::count())->toBe(2)
-        ->and(Question::count())->toBeGreaterThan(0);
+        ->and(Question::count())->toBeGreaterThan(0)
+        // Roadmap: tiap paket punya 1 modul berisi 3 materi + 1 try out
+        ->and(\App\Models\PackageModule::count())->toBe(2)
+        ->and(\App\Models\Content::count())->toBe(6)
+        ->and(\App\Models\RoadmapItem::count())->toBe(8);
 
     // Setiap user punya kode referral unik
     expect(User::whereNull('referral_code')->count())->toBe(0);
@@ -44,14 +48,21 @@ it('walks the subscription and payment relations', function () {
         ->and($package->plans()->count())->toBe(1);
 });
 
-it('distributes quizzes to packages via the polymorphic pivot', function () {
+it('distributes quizzes to packages via the learning roadmap', function () {
     $package = Package::factory()->create();
     $quiz = Quiz::factory()->create();
 
-    $package->quizzes()->attach($quiz);
+    $module = $package->modules()->create(['title' => 'Modul 1', 'order' => 1]);
+    $module->items()->create([
+        'contentable_type' => 'quiz',
+        'contentable_id' => $quiz->id,
+        'order' => 1,
+        'is_locked_by_default' => true,
+    ]);
 
     expect($package->quizzes()->count())->toBe(1)
-        ->and($quiz->packages()->first()->is($package))->toBeTrue();
+        ->and($package->quizItems()->count())->toBe(1)
+        ->and($quiz->packageIds()->all())->toBe([$package->id]);
 });
 
 it('scopes active subscriptions by status and expiry', function () {

@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection;
 
 class Quiz extends Model
 {
@@ -30,9 +31,18 @@ class Quiz extends Model
         return $this->hasMany(UserQuizAttempt::class);
     }
 
-    /** Paket-paket yang mendistribusikan kuis ini via pivot polimorfik `package_content` */
-    public function packages(): MorphToMany
+    /** Penempatan kuis ini di roadmap belajar */
+    public function roadmapItems(): MorphMany
     {
-        return $this->morphToMany(Package::class, 'contentable', 'package_content')->withTimestamps();
+        return $this->morphMany(RoadmapItem::class, 'contentable');
+    }
+
+    /** ID paket yang memuat kuis ini via roadmap (untuk gerbang akses) */
+    public function packageIds(): Collection
+    {
+        return PackageModule::whereIn('id', $this->roadmapItems()->pluck('module_id'))
+            ->pluck('package_id')
+            ->unique()
+            ->values();
     }
 }

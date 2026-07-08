@@ -71,6 +71,13 @@
                         </div>
                     @endforeach
                 </div>
+
+                {{-- PAKET DIMILIKI: masuk ke roadmap belajar --}}
+                @if ($isOwned)
+                    <x-ui.button variant="secondary" :href="route('user.journey', $package)" class="w-full justify-center">
+                        <x-lucide-map class="w-4 h-4" /> {{ __('Mulai Belajar') }}
+                    </x-ui.button>
+                @endif
             </x-ui.card>
         @endforeach
     </div>

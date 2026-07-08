@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ isset($title) ? $title . ' | ' . config('app.name') : config('app.name') }}</title>
 
-    <link rel="icon" href="{{ asset('assets/images/logo_cetar.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('assets/images/logo_cetar.svg') }}" type="image/svg+xml">
 
     {{-- Fonts Cetar: Inter (UI) + JetBrains Mono (timer & angka) --}}
     <link rel="preconnect" href="https://fonts.bunny.net">

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\User;
 
-use App\Models\Quiz;
+use App\Actions\Roadmap\ResolveJourney;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -32,17 +32,33 @@ class Dashboard extends Component
             ->get();
     }
 
-    /** Kuis yang bisa diakses user dari seluruh paket aktifnya (via pivot package_content) */
+    /**
+     * Perjalanan belajar per paket aktif: progres roadmap + item berikutnya.
+     *
+     * @return array<int, array{package: \App\Models\Package, total: int, completed: int, percent: int}>
+     */
     #[Computed]
-    public function availableQuizzes()
+    public function journeys(): array
     {
-        $packageIds = $this->activeSubscriptions->pluck('package_id');
+        $resolver = app(ResolveJourney::class);
+        $user = auth()->user();
 
-        return Quiz::query()
-            ->whereHas('packages', fn ($q) => $q->whereIn('packages.id', $packageIds))
-            ->withCount('questions')
-            ->latest()
-            ->get();
+        return $this->activeSubscriptions
+            ->map(function ($subscription) use ($resolver, $user) {
+                $items = $resolver->execute($user, $subscription->package)
+                    ->flatMap(fn ($module) => $module->items);
+
+                $total = $items->count();
+                $completed = $items->where('is_completed', true)->count();
+
+                return [
+                    'package' => $subscription->package,
+                    'total' => $total,
+                    'completed' => $completed,
+                    'percent' => $total > 0 ? (int) round($completed / $total * 100) : 0,
+                ];
+            })
+            ->all();
     }
 
     public function render()

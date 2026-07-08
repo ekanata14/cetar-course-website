@@ -14,6 +14,7 @@ class Question extends Model
         'quiz_id',
         'section',
         'passage',
+        'image_url',
         'text',
         'option_a',
         'option_b',
@@ -35,5 +36,22 @@ class Question extends Model
     public function quiz(): BelongsTo
     {
         return $this->belongsTo(Quiz::class);
+    }
+
+    /**
+     * URL gambar siap-embed. Link share Google Drive (file/d/{id}, open?id=,
+     * uc?id=) dinormalisasi ke host embed lh3; URL lain diteruskan apa adanya.
+     */
+    public function imageDisplayUrl(): ?string
+    {
+        if (! $this->image_url) {
+            return null;
+        }
+
+        if (preg_match('/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/', $this->image_url, $matches)) {
+            return 'https://lh3.googleusercontent.com/d/'.$matches[1];
+        }
+
+        return $this->image_url;
     }
 }

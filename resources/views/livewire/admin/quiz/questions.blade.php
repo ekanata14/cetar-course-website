@@ -13,9 +13,14 @@
                 <span class="font-mono font-extrabold tabular-nums">{{ $quiz->duration_minutes }}</span> {{ __('menit') }}
             </p>
         </div>
-        <x-ui.button wire:click="openCreate">
-            <x-lucide-plus class="w-4 h-4" /> {{ __('Tambah Soal') }}
-        </x-ui.button>
+        <div class="flex items-center gap-2">
+            <x-ui.button variant="ghost" wire:click="openImport">
+                <x-lucide-upload class="w-4 h-4" /> {{ __('Impor Excel') }}
+            </x-ui.button>
+            <x-ui.button wire:click="openCreate">
+                <x-lucide-plus class="w-4 h-4" /> {{ __('Tambah Soal') }}
+            </x-ui.button>
+        </div>
     </div>
 
     {{-- TAB FILTER SECTION --}}
@@ -58,6 +63,11 @@
                             </span>
                         </div>
                         <p class="text-[15px] leading-relaxed text-ink/90">{{ $question->text }}</p>
+                        @if ($question->image_url)
+                            <img src="{{ $question->imageDisplayUrl() }}" alt="{{ __('Gambar soal') }}"
+                                class="max-h-32 rounded-lg border border-black/10 object-contain"
+                                loading="lazy" onerror="this.style.display='none';">
+                        @endif
                     </div>
 
                     {{-- Aksi --}}
@@ -100,6 +110,16 @@
             <x-ui.textarea label="{{ __('Teks Bacaan / Passage (opsional)') }}" name="passage" wire:model="passage"
                 rows="3" placeholder="{{ __('Untuk soal dengan bacaan panjang') }}" />
 
+            <div class="space-y-2">
+                <x-ui.input label="{{ __('URL Gambar (opsional)') }}" name="imageUrl" wire:model.blur="imageUrl"
+                    placeholder="https://drive.google.com/file/d/... {{ __('atau URL gambar lain') }}" />
+                @if ($imageUrl)
+                    <img src="{{ (new \App\Models\Question(['image_url' => $imageUrl]))->imageDisplayUrl() }}"
+                        alt="{{ __('Pratinjau gambar') }}" class="max-h-40 rounded-lg border border-black/10 object-contain"
+                        onerror="this.style.display='none';">
+                @endif
+            </div>
+
             <x-ui.textarea label="{{ __('Pertanyaan') }}" name="text" wire:model="text" rows="3"
                 placeholder="{{ __('Tulis pertanyaan utama di sini...') }}" />
 
@@ -141,6 +161,53 @@
                 <x-ui.button type="submit" wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="save">{{ $editingId ? __('Simpan Perubahan') : __('Tambah Soal') }}</span>
                     <span wire:loading wire:target="save">{{ __('Menyimpan...') }}</span>
+                </x-ui.button>
+            </div>
+        </form>
+    </x-ui.modal>
+
+    {{-- MODAL IMPOR EXCEL --}}
+    <x-ui.modal wire:model="showImport" title="{{ __('Impor Soal dari Excel') }}" maxWidth="max-w-xl">
+        <form wire:submit="import" class="space-y-5">
+
+            <div class="rounded-xl bg-surface-tint p-4 text-sm leading-relaxed text-ink-muted space-y-2">
+                <p>{{ __('Gunakan template resmi agar kolom terbaca dengan benar. Kolom wajib: pertanyaan, opsi A–D, dan kunci jawaban.') }}</p>
+                <p>{{ __('Gambar soal? Isi kolom image_url dengan tautan Google Drive (set akses "Siapa saja dengan link") atau URL gambar lain.') }}</p>
+                <a href="{{ route('admin.quizzes.import-template') }}"
+                    class="inline-flex items-center gap-2 font-semibold text-primary hover:text-primary-dark transition-colors">
+                    <x-lucide-download class="w-4 h-4" /> {{ __('Unduh Template Excel') }}
+                </a>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-secondary">{{ __('File Excel (.xlsx / .csv)') }}</label>
+                <input type="file" wire:model="importFile" accept=".xlsx,.csv"
+                    class="block w-full text-sm text-ink file:me-4 file:px-4 file:py-2.5 file:rounded-xl file:border-0
+                        file:bg-surface-soft file:text-sm file:font-semibold file:text-secondary file:cursor-pointer
+                        hover:file:bg-surface-tint cursor-pointer">
+                <div wire:loading wire:target="importFile" class="text-xs text-ink-muted">{{ __('Mengunggah file...') }}</div>
+                @error('importFile')
+                    <p class="text-sm text-bad">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- ERROR PER BARIS --}}
+            @if ($importErrors !== [])
+                <div class="rounded-xl bg-bad-soft p-4 space-y-1.5 max-h-48 overflow-y-auto">
+                    <p class="text-sm font-bold text-bad">{{ __('Impor dibatalkan — tidak ada soal yang disimpan:') }}</p>
+                    @foreach ($importErrors as $importError)
+                        <p class="text-xs text-bad/90">{{ $importError }}</p>
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <x-ui.button variant="ghost" type="button" x-on:click="show = false">{{ __('Batal') }}</x-ui.button>
+                <x-ui.button type="submit" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="import">
+                        <span class="flex items-center gap-2"><x-lucide-upload class="w-4 h-4" /> {{ __('Impor Soal') }}</span>
+                    </span>
+                    <span wire:loading wire:target="import">{{ __('Mengimpor...') }}</span>
                 </x-ui.button>
             </div>
         </form>

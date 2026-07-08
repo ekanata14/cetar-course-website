@@ -95,6 +95,11 @@
                             </div>
                         @endif
 
+                        @if ($question->image_url)
+                            <img src="{{ $question->imageDisplayUrl() }}" alt="{{ __('Gambar soal') }}"
+                                class="max-h-60 rounded-xl border border-black/10 object-contain" loading="lazy">
+                        @endif
+
                         <p class="text-[15px] leading-relaxed text-ink/90 whitespace-pre-line">{{ $question->text }}</p>
 
                         {{-- Opsi dengan penanda kunci & pilihan user --}}

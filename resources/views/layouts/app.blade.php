@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ isset($title) ? $title . ' - ' . config('app.name') : config('app.name') }}</title>
 
-    <link rel="icon" href="{{ asset('assets/images/logo_cetar.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('assets/images/logo_cetar.svg') }}" type="image/svg+xml">
 
     {{-- Fonts Cetar: Inter (UI) + JetBrains Mono (timer & angka) --}}
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -35,9 +35,9 @@
 
         {{-- BRAND --}}
         <div class="px-5 pb-3 pt-6 flex items-center gap-3">
-            <img src="{{ asset('assets/images/logo_cetar.png') }}" alt="Logo" class="w-10 h-10 object-contain"
+            <img src="{{ asset('assets/images/logo_cetar.svg') }}" alt="Logo" class="w-10 h-10 object-contain"
                 onerror="this.style.display='none';">
-            <h2 class="font-extrabold tracking-tight text-xl text-secondary">{{ config('app.name', 'Cetar') }}</h2>
+            <h2 class="font-extrabold tracking-tight text-xl text-secondary">{{ config('app.name', 'BIMBEL CETAR') }}</h2>
         </div>
 
         {{-- MENU (role-based) --}}
@@ -52,6 +52,9 @@
                 </x-ui.sidebar-link>
                 <x-ui.sidebar-link route="admin.packages" pattern="admin.packages*" label="{{ __('Paket') }}">
                     <x-slot:icon><x-lucide-package class="w-4 h-4" /></x-slot:icon>
+                </x-ui.sidebar-link>
+                <x-ui.sidebar-link route="admin.contents" pattern="admin.contents*" label="{{ __('Materi') }}">
+                    <x-slot:icon><x-lucide-book-open class="w-4 h-4" /></x-slot:icon>
                 </x-ui.sidebar-link>
                 <x-ui.sidebar-link route="admin.quizzes" pattern="admin.quizzes*" label="{{ __('Kuis') }}">
                     <x-slot:icon><x-lucide-file-text class="w-4 h-4" /></x-slot:icon>

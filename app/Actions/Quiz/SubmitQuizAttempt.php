@@ -2,6 +2,7 @@
 
 namespace App\Actions\Quiz;
 
+use App\Actions\Roadmap\CompleteQuizRoadmapItems;
 use App\Enums\AttemptStatus;
 use App\Models\UserQuizAttempt;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -11,6 +12,7 @@ class SubmitQuizAttempt
 {
     public function __construct(
         private CalculateFinalScore $calculateFinalScore,
+        private CompleteQuizRoadmapItems $completeRoadmapItems,
     ) {}
 
     /**
@@ -28,7 +30,7 @@ class SubmitQuizAttempt
             return $attempt;
         }
 
-        return DB::transaction(function () use ($attempt) {
+        $attempt = DB::transaction(function () use ($attempt) {
             $score = $this->calculateFinalScore->execute($attempt);
 
             $attempt->update([
@@ -39,5 +41,10 @@ class SubmitQuizAttempt
 
             return $attempt->refresh();
         });
+
+        // Buka gerbang roadmap: item yang menunjuk kuis ini ditandai selesai
+        $this->completeRoadmapItems->execute($attempt->user, $attempt->quiz);
+
+        return $attempt;
     }
 }

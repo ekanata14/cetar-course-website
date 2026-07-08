@@ -51,11 +51,12 @@ class AppServiceProvider extends ServiceProvider
             : null
         );
 
-        // Morph map untuk semua relasi polimorfik: pivot `package_content` dan notifiable pada notifications.
+        // Morph map untuk semua relasi polimorfik: `roadmap_items.contentable` dan notifiable pada notifications.
         // enforceMorphMap memastikan tidak ada FQCN yang bocor ke kolom *_type di database.
         Relation::enforceMorphMap([
             'user' => \App\Models\User::class,
             'quiz' => \App\Models\Quiz::class,
+            'content' => \App\Models\Content::class,
         ]);
     }
 }

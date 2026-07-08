@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Quiz;
 
 use App\Actions\Quiz\DeleteQuestion;
+use App\Actions\Quiz\ImportQuestions;
 use App\Actions\Quiz\SaveQuestion;
 use App\DTOs\Quiz\QuestionData;
 use App\Models\Question;
@@ -11,6 +12,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Mary\Traits\Toast;
 
 #[Layout('layouts.app')]
@@ -18,6 +20,7 @@ use Mary\Traits\Toast;
 class Questions extends Component
 {
     use Toast;
+    use WithFileUploads;
 
     public Quiz $quiz;
 
@@ -51,6 +54,16 @@ class Questions extends Component
 
     public string $explanation = '';
 
+    public string $imageUrl = '';
+
+    // --- STATE IMPOR EXCEL ---
+    public bool $showImport = false;
+
+    public $importFile = null;
+
+    /** @var array<int, string> Error per baris dari impor terakhir */
+    public array $importErrors = [];
+
     public function mount(Quiz $quiz): void
     {
         $this->authorize('update', $quiz);
@@ -73,6 +86,7 @@ class Questions extends Component
             'correctAnswer' => $this->optionE === '' ? 'required|in:A,B,C,D' : 'required|in:A,B,C,D,E',
             'points' => 'required|integer|min:0|max:100',
             'explanation' => 'nullable|string',
+            'imageUrl' => 'nullable|url|max:2048',
         ];
     }
 
@@ -136,6 +150,7 @@ class Questions extends Component
         $this->correctAnswer = $question->correct_answer;
         $this->points = $question->points;
         $this->explanation = $question->explanation ?? '';
+        $this->imageUrl = $question->image_url ?? '';
 
         $this->showForm = true;
     }
@@ -161,6 +176,7 @@ class Questions extends Component
             correctAnswer: $this->correctAnswer,
             points: $this->points,
             explanation: $this->explanation ?: null,
+            imageUrl: $this->imageUrl ?: null,
         );
 
         $question = $this->editingId
@@ -185,6 +201,39 @@ class Questions extends Component
         $this->success('Soal dihapus.', position: 'toast-top');
     }
 
+    // --- IMPOR EXCEL ---
+
+    public function openImport(): void
+    {
+        $this->reset(['importFile', 'importErrors']);
+        $this->resetValidation();
+        $this->showImport = true;
+    }
+
+    public function import(ImportQuestions $action): void
+    {
+        $this->authorize('update', $this->quiz);
+
+        $this->validate(
+            ['importFile' => 'required|file|mimes:xlsx,csv|max:10240'],
+            [],
+            ['importFile' => 'file Excel'],
+        );
+
+        $result = $action->execute($this->quiz, $this->importFile->getRealPath());
+
+        if ($result->failed()) {
+            $this->importErrors = $result->errors;
+            $this->error('Impor dibatalkan — perbaiki file lalu unggah ulang.', position: 'toast-top');
+
+            return;
+        }
+
+        $this->success("{$result->imported} soal berhasil diimpor.", position: 'toast-top');
+        $this->showImport = false;
+        $this->reset(['importFile', 'importErrors']);
+    }
+
     // --- HELPERS ---
 
     private function resetForm(): void
@@ -192,7 +241,7 @@ class Questions extends Component
         $this->reset([
             'editingId', 'section', 'passage', 'text',
             'optionA', 'optionB', 'optionC', 'optionD', 'optionE',
-            'correctAnswer', 'points', 'explanation',
+            'correctAnswer', 'points', 'explanation', 'imageUrl',
         ]);
         $this->resetValidation();
     }

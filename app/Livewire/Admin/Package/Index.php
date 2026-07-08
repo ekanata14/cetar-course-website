@@ -167,7 +167,7 @@ class Index extends Component
     public function render()
     {
         $packages = Package::query()
-            ->withCount(['plans', 'quizzes', 'subscriptions'])
+            ->withCount(['plans', 'quizItems as quizzes_count', 'subscriptions'])
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->latest()
             ->paginate(10);

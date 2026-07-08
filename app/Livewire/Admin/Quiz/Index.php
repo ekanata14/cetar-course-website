@@ -6,9 +6,7 @@ use App\Actions\Quiz\CreateQuiz;
 use App\Actions\Quiz\DeleteQuiz;
 use App\Actions\Quiz\UpdateQuiz;
 use App\DTOs\Quiz\QuizData;
-use App\Models\Package;
 use App\Models\Quiz;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -36,17 +34,12 @@ class Index extends Component
 
     public int $durationMinutes = 100;
 
-    /** @var array<int, int> Paket yang mendistribusikan kuis ini */
-    public array $packageIds = [];
-
     protected function rules(): array
     {
         return [
             'title' => 'required|string|min:3|max:255',
             'description' => 'nullable|string',
             'durationMinutes' => 'required|integer|min:1|max:600',
-            'packageIds' => 'array',
-            'packageIds.*' => 'exists:packages,id',
         ];
     }
 
@@ -56,13 +49,6 @@ class Index extends Component
             'title' => 'judul kuis',
             'durationMinutes' => 'durasi',
         ];
-    }
-
-    /** Semua paket untuk pilihan distribusi di form */
-    #[Computed]
-    public function packageOptions()
-    {
-        return Package::orderBy('name')->get(['id', 'name']);
     }
 
     // --- AKSI MODAL ---
@@ -84,7 +70,6 @@ class Index extends Component
         $this->title = $quiz->title;
         $this->description = $quiz->description ?? '';
         $this->durationMinutes = $quiz->duration_minutes;
-        $this->packageIds = $quiz->packages()->pluck('packages.id')->all();
 
         $this->showForm = true;
     }
@@ -100,7 +85,6 @@ class Index extends Component
             title: $this->title,
             description: $this->description ?: null,
             durationMinutes: $this->durationMinutes,
-            packageIds: array_map('intval', $this->packageIds),
         );
 
         if ($this->editingId) {
@@ -130,7 +114,7 @@ class Index extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['editingId', 'title', 'description', 'durationMinutes', 'packageIds']);
+        $this->reset(['editingId', 'title', 'description', 'durationMinutes']);
         $this->resetValidation();
     }
 
@@ -138,7 +122,7 @@ class Index extends Component
     {
         $quizzes = Quiz::query()
             ->withCount('questions')
-            ->with('packages:id,name')
+            ->with('roadmapItems.module.package:id,name')
             ->when($this->search, fn ($q) => $q->where('title', 'like', "%{$this->search}%"))
             ->latest()
             ->paginate(10);

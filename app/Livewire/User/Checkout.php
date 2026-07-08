@@ -25,7 +25,7 @@ class Checkout extends Component
         abort_unless($plan->package->is_active, 404);
 
         $this->plan = $plan->load('package');
-        $this->plan->package->loadCount('quizzes');
+        $this->plan->package->loadCount(['quizItems as quizzes_count']);
     }
 
     /** Invoice pending yang sudah ada untuk plan ini — dipakai ulang saat bayar */

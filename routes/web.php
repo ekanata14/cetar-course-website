@@ -3,7 +3,9 @@
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 // Auth Routes
 use App\Livewire\Admin\GlobalSearch;
+use App\Livewire\Admin\Content\Index as AdminContentIndex;
 use App\Livewire\Admin\Package\Index as AdminPackageIndex;
+use App\Livewire\Admin\Package\RoadmapBuilder as AdminRoadmapBuilder;
 use App\Livewire\Admin\Quiz\Index as AdminQuizIndex;
 use App\Livewire\Admin\Quiz\Questions as AdminQuizQuestions;
 use App\Livewire\Admin\User\Index as AdminUserIndex;
@@ -17,6 +19,7 @@ use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
 // Settings Route
 use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\Exam\QuizBriefing;
 use App\Livewire\Exam\QuizEngine;
 use App\Livewire\Exam\QuizResult;
 // Admin Routes
@@ -24,6 +27,8 @@ use App\Livewire\Settings;
 use App\Livewire\User\Affiliate as UserAffiliate;
 use App\Livewire\User\Dashboard as UserDashboard;
 use App\Livewire\User\Checkout as UserCheckout;
+use App\Livewire\User\MaterialsJourney as UserMaterialsJourney;
+use App\Models\RoadmapItem;
 use App\Livewire\User\Onboarding as UserOnboarding;
 use App\Livewire\User\Packages as UserPackages;
 use App\Livewire\User\Transactions as UserTransactions;
@@ -37,7 +42,7 @@ Route::get('/', function () {
     return view('welcome', [
         'packages' => Package::active()
             ->with(['plans' => fn ($q) => $q->orderBy('duration_days')])
-            ->withCount('quizzes')
+            ->withCount(['quizItems as quizzes_count'])
             ->orderBy('name')
             ->get(),
     ]);
@@ -92,8 +97,13 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
 
     // Modul Admin: CRUD Paket & Kuis (Phase 3)
     Route::get('/packages', AdminPackageIndex::class)->name('packages');
+    Route::get('/packages/{package}/roadmap', AdminRoadmapBuilder::class)->name('packages.roadmap');
     Route::get('/quizzes', AdminQuizIndex::class)->name('quizzes');
+    Route::get('/quizzes/import-template', \App\Http\Controllers\Admin\QuestionImportTemplateController::class)->name('quizzes.import-template');
     Route::get('/quizzes/{quiz}/questions', AdminQuizQuestions::class)->name('quizzes.questions');
+
+    // Modul Admin: CRUD materi belajar (teks/PDF/video) untuk roadmap
+    Route::get('/contents', AdminContentIndex::class)->name('contents');
 
     // Modul Admin: antrian persetujuan penarikan saldo (Phase 5)
     Route::get('/withdrawals', AdminWithdrawalIndex::class)->name('withdrawals');
@@ -105,9 +115,19 @@ Route::middleware(['auth', 'verified', 'role:user'])->prefix('user')->name('user
     // Onboarding user baru: tutorial singkat + pilih paket
     Route::get('/onboarding', UserOnboarding::class)->name('onboarding');
 
-    // CBT Engine (Phase 4): ruang ujian + hasil
+    // CBT Engine (Phase 4): persiapan (aturan main) + ruang ujian + hasil
     Route::get('/exam/result/{attempt}', QuizResult::class)->name('exam.result');
+    Route::get('/exam/{quiz}/prepare', QuizBriefing::class)->name('exam.prepare');
     Route::get('/exam/{quiz}', QuizEngine::class)->name('exam');
+
+    // Ruang belajar: player dua kolom (sidebar roadmap + panel materi)
+    Route::get('/journey/{package}', UserMaterialsJourney::class)->name('journey');
+
+    // Kompat tautan lama /learn/{item} → buka player dengan item tersebut aktif
+    Route::get('/learn/{item}', fn (RoadmapItem $item) => redirect()->route('user.journey', [
+        'package' => $item->module->package_id,
+        'item' => $item->id,
+    ]))->name('learn');
 
     // Subscription & Affiliate (Phase 5)
     Route::get('/packages', UserPackages::class)->name('packages');

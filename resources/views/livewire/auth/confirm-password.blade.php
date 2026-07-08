@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Konfirmasi Password') }} - {{ config('app.name', 'Cetar') }}</title>
-    <link rel="icon" href="{{ asset('assets/images/logo_cetar.png') }}" type="image/x-icon">
+    <title>{{ __('Konfirmasi Password') }} - {{ config('app.name', 'BIMBEL CETAR') }}</title>
+    <link rel="icon" href="{{ asset('assets/images/logo_cetar.svg') }}" type="image/svg+xml">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

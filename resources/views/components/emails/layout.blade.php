@@ -21,7 +21,7 @@
                     <tr>
                         <td style="background:linear-gradient(100deg,#F5872A 0%,#FBB823 100%); padding:24px 32px;">
                             <span style="color:#FFFFFF; font-size:22px; font-weight:800; letter-spacing:-0.5px;">
-                                {{ config('app.name', 'Cetar') }}
+                                {{ config('app.name', 'BIMBEL CETAR') }}
                             </span>
                         </td>
                     </tr>
@@ -37,8 +37,8 @@
                     <tr>
                         <td style="padding:20px 32px; background-color:#FBF9F6;">
                             <p style="margin:0; color:#9AA7AE; font-size:12px; line-height:1.6;">
-                                Email ini dikirim otomatis oleh {{ config('app.name', 'Cetar') }} — mohon tidak membalas.
-                                <br>© {{ date('Y') }} {{ config('app.name', 'Cetar') }}. All rights reserved.
+                                Email ini dikirim otomatis oleh {{ config('app.name', 'BIMBEL CETAR') }} — mohon tidak membalas.
+                                <br>© {{ date('Y') }} {{ config('app.name', 'BIMBEL CETAR') }}. All rights reserved.
                             </p>
                         </td>
                     </tr>

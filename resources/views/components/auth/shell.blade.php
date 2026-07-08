@@ -20,9 +20,9 @@
 
         {{-- Brand --}}
         <a href="{{ route('home') }}" class="relative z-10 flex items-center gap-3">
-            <img src="{{ asset('assets/images/logo_cetar.png') }}" alt="Logo Cetar" class="w-10 h-10 object-contain"
+            <img src="{{ asset('assets/images/logo_cetar.svg') }}" alt="Logo Cetar" class="w-10 h-10 object-contain"
                 onerror="this.style.display='none';">
-            <span class="font-extrabold tracking-tight text-2xl">{{ config('app.name', 'Cetar') }}</span>
+            <span class="font-extrabold tracking-tight text-2xl">{{ config('app.name', 'BIMBEL CETAR') }}</span>
         </a>
 
         {{-- Copywriting --}}
@@ -50,7 +50,7 @@
             </ul>
         </div>
 
-        <p class="relative z-10 text-xs text-white/40">© {{ date('Y') }} {{ config('app.name', 'Cetar') }}. All rights reserved.</p>
+        <p class="relative z-10 text-xs text-white/40">© {{ date('Y') }} {{ config('app.name', 'BIMBEL CETAR') }}. All rights reserved.</p>
     </div>
 
     {{-- KANAN: FORM --}}
@@ -59,9 +59,9 @@
 
             {{-- Brand kecil (mobile only, karena panel kiri tersembunyi) --}}
             <a href="{{ route('home') }}" class="lg:hidden flex items-center gap-2 mb-8">
-                <img src="{{ asset('assets/images/logo_cetar.png') }}" alt="Logo Cetar" class="w-8 h-8 object-contain"
+                <img src="{{ asset('assets/images/logo_cetar.svg') }}" alt="Logo Cetar" class="w-8 h-8 object-contain"
                     onerror="this.style.display='none';">
-                <span class="font-extrabold tracking-tight text-xl text-secondary">{{ config('app.name', 'Cetar') }}</span>
+                <span class="font-extrabold tracking-tight text-xl text-secondary">{{ config('app.name', 'BIMBEL CETAR') }}</span>
             </a>
 
             <div class="mb-8">

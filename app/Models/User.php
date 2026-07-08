@@ -62,6 +62,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserQuizAttempt::class);
     }
 
+    /** Kemajuan belajar user pada item roadmap */
+    public function progress(): HasMany
+    {
+        return $this->hasMany(UserProgress::class);
+    }
+
     /** Komisi yang diterima user ini sebagai referrer */
     public function referralCommissions(): HasMany
     {

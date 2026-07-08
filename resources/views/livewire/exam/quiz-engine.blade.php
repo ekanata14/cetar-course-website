@@ -71,6 +71,12 @@
                         </div>
                     @endif
 
+                    {{-- Gambar soal (opsional) --}}
+                    @if ($this->currentQuestion->image_url)
+                        <img src="{{ $this->currentQuestion->imageDisplayUrl() }}" alt="{{ __('Gambar soal') }}"
+                            class="max-h-72 rounded-xl border border-black/10 object-contain" loading="lazy">
+                    @endif
+
                     {{-- Pertanyaan --}}
                     <p class="text-[15px] md:text-base leading-relaxed text-ink font-medium whitespace-pre-line">{{ $this->currentQuestion->text }}</p>
 

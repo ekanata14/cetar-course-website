@@ -5,7 +5,7 @@
         <div class="space-y-1">
             <p class="text-[11px] font-semibold uppercase tracking-wider text-ink-faint">{{ __('Onboarding') }}</p>
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-secondary">
-                {{ __('Selamat datang di Cetar') }}, {{ auth()->user()->name }} 👋
+                {{ __('Selamat datang di BIMBEL CETAR') }}, {{ auth()->user()->name }} 👋
             </h1>
             <p class="text-[15px] leading-relaxed text-ink-muted">
                 {{ __('Kenali cara kerja platform, lalu pilih paket belajarmu.') }}
