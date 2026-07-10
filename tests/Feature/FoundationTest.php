@@ -19,12 +19,13 @@ it('seeds the foundation data', function () {
         ->and(User::count())->toBe(12) // 1 admin + 10 demo users + 1 demo pejuang (demo@cetar.id)
         ->and(Package::count())->toBe(1)
         ->and(PackagePlan::count())->toBe(2)
-        ->and(Quiz::count())->toBe(1)
+        // Quiz: Try Out Akbar SKD CPNS #1 + bank try out (CPNS Paket 01)
+        ->and(Quiz::count())->toBe(2)
         ->and(Question::count())->toBeGreaterThan(0)
-        // Roadmap: paket punya 1 modul berisi 3 materi + 1 try out
-        ->and(\App\Models\PackageModule::count())->toBe(1)
+        // Roadmap: Modul 1 (3 materi + 1 try out) + Bank Try Out CPNS (1 try out)
+        ->and(\App\Models\PackageModule::count())->toBe(2)
         ->and(\App\Models\Content::count())->toBe(3)
-        ->and(\App\Models\RoadmapItem::count())->toBe(4);
+        ->and(\App\Models\RoadmapItem::count())->toBe(5);
 
     // Setiap user punya kode referral unik
     expect(User::whereNull('referral_code')->count())->toBe(0);

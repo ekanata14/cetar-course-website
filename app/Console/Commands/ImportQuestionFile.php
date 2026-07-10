@@ -15,7 +15,8 @@ class ImportQuestionFile extends Command
         {--quiz-title= : Judul kuis yang dibuat (wajib)}
         {--slug= : Slug folder gambar di /storage/questions/{slug}}
         {--duration=100 : Durasi kuis dalam menit}
-        {--module= : ID PackageModule untuk menempelkan kuis ke roadmap (opsional)}';
+        {--module= : ID PackageModule untuk menempelkan kuis ke roadmap (opsional)}
+        {--no-archive : Lewati penulisan arsip xlsx (dipakai saat seeding)}';
 
     protected $description = 'Impor soal dari JSON ke kuis baru + arsip xlsx dalam format template';
 
@@ -90,7 +91,9 @@ class ImportQuestionFile extends Command
             return $quiz;
         });
 
-        $this->writeXlsxArchive($quiz, $rows, $slug);
+        if (! $this->option('no-archive')) {
+            $this->writeXlsxArchive($quiz, $rows, $slug);
+        }
 
         $this->info("'{$quiz->title}': {$quiz->questions()->count()} soal diimpor (quiz id {$quiz->id}).");
 
