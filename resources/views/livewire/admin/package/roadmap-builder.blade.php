@@ -46,11 +46,15 @@
                             class="p-1.5 rounded-lg text-secondary hover:bg-surface-soft transition-all cursor-pointer" aria-label="Edit">
                             <x-lucide-pencil class="w-4 h-4" />
                         </button>
-                        <button type="button" wire:click="deleteModule({{ $module->id }})"
-                            wire:confirm="{{ __('Hapus modul ini? Semua item dan progres siswa di dalamnya ikut terhapus.') }}"
-                            class="p-1.5 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer" aria-label="Delete">
-                            <x-lucide-trash-2 class="w-4 h-4" />
-                        </button>
+                        <x-ui.confirm action="deleteModule({{ $module->id }})"
+                            title="{{ __('Hapus Modul?') }}"
+                            message="{{ __('Semua item dan progres siswa di dalamnya ikut terhapus.') }}"
+                            confirm-label="{{ __('Hapus') }}">
+                            <button type="button"
+                                class="p-1.5 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer" aria-label="Delete">
+                                <x-lucide-trash-2 class="w-4 h-4" />
+                            </button>
+                        </x-ui.confirm>
                     </div>
                 </div>
 
@@ -109,11 +113,15 @@
                                     aria-label="Turun">
                                     <x-lucide-chevron-down class="w-4 h-4" />
                                 </button>
-                                <button type="button" wire:click="removeItem({{ $item->id }})"
-                                    wire:confirm="{{ __('Lepas item ini dari modul? Progres siswa pada item ini ikut terhapus.') }}"
-                                    class="p-1.5 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer" aria-label="Remove">
-                                    <x-lucide-x class="w-4 h-4" />
-                                </button>
+                                <x-ui.confirm action="removeItem({{ $item->id }})"
+                                    title="{{ __('Lepas Item?') }}"
+                                    message="{{ __('Item dilepas dari modul dan progres siswa pada item ini ikut terhapus.') }}"
+                                    confirm-label="{{ __('Lepas') }}">
+                                    <button type="button"
+                                        class="p-1.5 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer" aria-label="Remove">
+                                        <x-lucide-x class="w-4 h-4" />
+                                    </button>
+                                </x-ui.confirm>
                             </div>
                         </div>
                     @empty

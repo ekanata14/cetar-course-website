@@ -42,6 +42,27 @@
         </div>
     </header>
 
+    {{-- ================= TAB SECTION (TWK / TIU / TKP) ================= --}}
+    {{-- Satu sesi ujian, dibagi per section. Ganti tab = ganti kumpulan soal aktif. --}}
+    @if ($this->sections->count() > 1)
+        <nav class="sticky top-[57px] z-20 bg-surface/95 backdrop-blur border-b border-black/5 px-4 md:px-8">
+            <div class="max-w-7xl mx-auto flex gap-1 overflow-x-auto">
+                @foreach ($this->sections as $section)
+                    <button type="button" wire:key="tab-{{ $section }}" wire:click="setSection('{{ $section }}')"
+                        class="relative shrink-0 px-4 py-3 text-sm font-bold transition-all cursor-pointer whitespace-nowrap
+                            {{ $activeSection === $section
+                                ? 'text-primary-dark'
+                                : 'text-ink-muted hover:text-secondary' }}">
+                        {{ $this->sectionLabel($section) }}
+                        @if ($activeSection === $section)
+                            <span class="absolute inset-x-3 -bottom-px h-0.5 rounded-full brand-grad"></span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+        </nav>
+    @endif
+
     {{-- ================= KONTEN ================= --}}
     <div class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
@@ -50,18 +71,16 @@
             @if ($this->currentQuestion)
                 <x-ui.card class="!p-6 md:!p-8 space-y-5">
 
-                    {{-- Meta soal --}}
+                    {{-- Meta soal: penomoran per-section (reset tiap tab) --}}
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="text-sm font-bold text-secondary">
-                            {{ __('Soal') }}
+                            {{ __('Soal No') }} :
                             <span class="font-mono font-extrabold tabular-nums">{{ $currentIndex + 1 }}</span>
-                            / {{ $this->questions->count() }}
+                            / {{ $this->sectionQuestions->count() }}
                         </span>
-                        @if ($this->currentQuestion->section)
-                            <span class="text-[11px] font-semibold uppercase tracking-wider text-primary-dark bg-primary/10 px-2 py-0.5 rounded-full">
-                                {{ $this->currentQuestion->section }}
-                            </span>
-                        @endif
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-primary-dark bg-primary/10 px-2 py-0.5 rounded-full">
+                            {{ __('Section') }} : {{ $activeSection }}
+                        </span>
                     </div>
 
                     {{-- Passage / teks bacaan --}}
@@ -95,9 +114,14 @@
                                     {{ $isSelected ? 'bg-white text-primary-dark' : 'bg-surface text-secondary shadow-card' }}">
                                     {{ $letter }}
                                 </span>
-                                <span class="text-[15px] leading-relaxed {{ $isSelected ? 'text-white' : 'text-ink/90' }}">
-                                    {{ $this->currentQuestion->{$column} }}
-                                </span>
+                                @if ($this->currentQuestion->optionIsImage($this->currentQuestion->{$column}))
+                                    <img src="{{ $this->currentQuestion->{$column} }}" alt="{{ __('Opsi') }} {{ $letter }}"
+                                        loading="lazy" class="max-h-40 object-contain rounded-lg bg-white p-1">
+                                @else
+                                    <span class="text-[15px] leading-relaxed {{ $isSelected ? 'text-white' : 'text-ink/90' }}">
+                                        {{ $this->currentQuestion->{$column} }}
+                                    </span>
+                                @endif
                             </button>
                         @endforeach
                     </div>
@@ -136,11 +160,17 @@
         {{-- -------- GRID NAVIGASI SOAL -------- --}}
         <div class="lg:col-span-4 space-y-4 lg:sticky lg:top-24">
             <x-ui.card class="space-y-4">
-                <p class="text-sm font-bold text-secondary">{{ __('Navigasi Soal') }}</p>
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-bold text-secondary">{{ __('Navigasi Soal') }}</p>
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-primary-dark bg-primary/10 px-2 py-0.5 rounded-full">
+                        {{ $activeSection }}
+                    </span>
+                </div>
 
                 {{-- Sel status: ok = dijawab · warn = ragu · gridgrey = kosong · ring = aktif --}}
+                {{-- Grid per-section: nomor 1..N khusus section aktif --}}
                 <div class="grid grid-cols-8 sm:grid-cols-10 lg:grid-cols-6 xl:grid-cols-8 gap-1.5">
-                    @foreach ($this->questions as $index => $question)
+                    @foreach ($this->sectionQuestions as $index => $question)
                         @php
                             $answer = $answers[$question->id] ?? null;
                             $cellColor = match (true) {
@@ -168,22 +198,40 @@
             {{-- Ringkasan + submit --}}
             <x-ui.card class="space-y-4">
                 @php
-                    $answeredCount = collect($answers)->filter(fn ($a) => $a['selected'] !== null)->count();
+                    $sectionTotal = $this->sectionQuestions->count();
+                    $sectionAnswered = $this->sectionAnsweredCount;
                 @endphp
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-ink-muted">{{ __('Terjawab') }}</span>
+
+                {{-- Counter section aktif (seperti "X Dijawab" / "Y Belum") --}}
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="rounded-xl bg-ok/10 px-3 py-2.5 text-center">
+                        <p class="font-mono font-extrabold tabular-nums text-lg text-ok leading-none">{{ $sectionAnswered }}</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-ink-muted mt-1">{{ __('Dijawab') }}</p>
+                    </div>
+                    <div class="rounded-xl bg-gridgrey/20 px-3 py-2.5 text-center">
+                        <p class="font-mono font-extrabold tabular-nums text-lg text-secondary leading-none">{{ $sectionTotal - $sectionAnswered }}</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-ink-muted mt-1">{{ __('Belum') }}</p>
+                    </div>
+                </div>
+
+                {{-- Progres seluruh sesi (semua section) --}}
+                <div class="flex items-center justify-between text-sm border-t border-black/5 pt-3">
+                    <span class="text-ink-muted">{{ __('Total terjawab') }}</span>
                     <span class="font-mono font-extrabold tabular-nums text-secondary">
-                        {{ $answeredCount }}/{{ $this->questions->count() }}
+                        {{ $this->answeredCount }}/{{ $this->questions->count() }}
                     </span>
                 </div>
 
-                <x-ui.button class="w-full" wire:click="submitQuiz"
-                    wire:confirm="{{ __('Selesaikan ujian sekarang? Jawaban yang belum diisi akan dianggap kosong.') }}"
-                    wire:loading.attr="disabled">
-                    <x-lucide-send class="w-4 h-4" />
-                    <span wire:loading.remove wire:target="submitQuiz">{{ __('Selesaikan Ujian') }}</span>
-                    <span wire:loading wire:target="submitQuiz">{{ __('Mengirim...') }}</span>
-                </x-ui.button>
+                <x-ui.confirm action="submitQuiz()" variant="primary"
+                    title="{{ __('Selesaikan Ujian?') }}"
+                    message="{{ __('Jawaban yang belum diisi akan dianggap kosong.') }}"
+                    confirm-label="{{ __('Selesaikan') }}">
+                    <x-ui.button class="w-full" wire:loading.attr="disabled" wire:target="submitQuiz">
+                        <x-lucide-send class="w-4 h-4" />
+                        <span wire:loading.remove wire:target="submitQuiz">{{ __('Selesaikan Ujian') }}</span>
+                        <span wire:loading wire:target="submitQuiz">{{ __('Mengirim...') }}</span>
+                    </x-ui.button>
+                </x-ui.confirm>
             </x-ui.card>
         </div>
     </div>

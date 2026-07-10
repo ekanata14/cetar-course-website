@@ -139,6 +139,38 @@ test('submitting calculates the score and marks answers correct', function () {
         ->and($attempt->answers()->where('question_id', $q2->id)->first()->is_correct)->toBeFalse();
 });
 
+test('sections are tabbed in canonical order and navigation is scoped per section', function () {
+    [$user, $quiz] = subscribedUserWithQuiz(0);
+    // Buat soal lintas section dengan urutan acak; tab harus tetap TWK → TIU → TKP
+    Question::factory()->count(2)->for($quiz)->create(['section' => 'TKP']);
+    Question::factory()->count(3)->for($quiz)->create(['section' => 'TWK']);
+    Question::factory()->count(4)->for($quiz)->create(['section' => 'TIU']);
+
+    $component = Livewire::actingAs($user)->test(QuizEngine::class, ['quiz' => $quiz]);
+
+    // Urutan tab baku & tab awal = TWK
+    expect($component->instance()->sections->all())->toBe(['TWK', 'TIU', 'TKP'])
+        ->and($component->get('activeSection'))->toBe('TWK')
+        // Grid section aktif hanya berisi soal TWK (3 soal)
+        ->and($component->instance()->sectionQuestions)->toHaveCount(3);
+
+    // Pindah ke TIU: reset index, grid berisi 4 soal TIU
+    $component->call('setSection', 'TIU');
+    expect($component->get('activeSection'))->toBe('TIU')
+        ->and($component->get('currentIndex'))->toBe(0)
+        ->and($component->instance()->sectionQuestions)->toHaveCount(4);
+
+    // goTo dibatasi jumlah soal section aktif (indeks 3 valid, 4 ditolak)
+    $component->call('goTo', 3);
+    expect($component->get('currentIndex'))->toBe(3);
+    $component->call('goTo', 4);
+    expect($component->get('currentIndex'))->toBe(3);
+
+    // Section tak dikenal diabaikan
+    $component->call('setSection', 'ZZZ');
+    expect($component->get('activeSection'))->toBe('TIU');
+});
+
 test('opening an expired attempt auto-submits and redirects to the result', function () {
     [$user, $quiz] = subscribedUserWithQuiz();
 

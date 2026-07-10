@@ -64,15 +64,13 @@ class ImportQuestionFile extends Command
                 $quiz->questions()->create([
                     'section' => $row['section'] ?? null,
                     'passage' => ($row['passage'] ?? null) ?: null,
-                    'image_url' => ! empty($row['image']) && $slug
-                        ? "/storage/questions/{$slug}/{$row['image']}"
-                        : null,
+                    'image_url' => $this->resolveImageValue($row['image'] ?? null, $slug),
                     'text' => $row['text'],
-                    'option_a' => $row['option_a'],
-                    'option_b' => $row['option_b'],
-                    'option_c' => $row['option_c'],
-                    'option_d' => $row['option_d'],
-                    'option_e' => ($row['option_e'] ?? null) ?: null,
+                    'option_a' => $this->resolveImageValue($row['option_a'], $slug),
+                    'option_b' => $this->resolveImageValue($row['option_b'], $slug),
+                    'option_c' => $this->resolveImageValue($row['option_c'], $slug),
+                    'option_d' => $this->resolveImageValue($row['option_d'], $slug),
+                    'option_e' => $this->resolveImageValue(($row['option_e'] ?? null) ?: null, $slug),
                     'correct_answer' => strtoupper($row['correct_answer']),
                     'points' => 5,
                     'explanation' => ($row['explanation'] ?? null) ?: null,
@@ -99,6 +97,25 @@ class ImportQuestionFile extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Ekspansi nilai gambar: nama file gambar polos (mis. "img2.png") menjadi
+     * path storage "/storage/questions/{slug}/img2.png". Dipakai untuk field
+     * image maupun opsi jawaban bergambar (soal figural TIU). Teks biasa
+     * (kalimat opsi) tidak cocok regex → dikembalikan apa adanya.
+     */
+    private function resolveImageValue(?string $value, ?string $slug): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if ($slug && preg_match('/^[\w.\-]+\.(png|jpe?g|gif|webp)$/i', $value)) {
+            return "/storage/questions/{$slug}/{$value}";
+        }
+
+        return $value;
+    }
+
     /** Arsip xlsx dalam format template impor — catatan permanen untuk admin */
     private function writeXlsxArchive(Quiz $quiz, array $rows, ?string $slug): void
     {
@@ -115,15 +132,15 @@ class ImportQuestionFile extends Command
                 'section' => $row['section'] ?? '',
                 'passage' => $row['passage'] ?? '',
                 'text' => $row['text'],
-                'option_a' => $row['option_a'],
-                'option_b' => $row['option_b'],
-                'option_c' => $row['option_c'],
-                'option_d' => $row['option_d'],
-                'option_e' => $row['option_e'] ?? '',
+                'option_a' => $this->resolveImageValue($row['option_a'], $slug),
+                'option_b' => $this->resolveImageValue($row['option_b'], $slug),
+                'option_c' => $this->resolveImageValue($row['option_c'], $slug),
+                'option_d' => $this->resolveImageValue($row['option_d'], $slug),
+                'option_e' => $this->resolveImageValue($row['option_e'] ?? '', $slug) ?? '',
                 'correct_answer' => strtoupper($row['correct_answer']),
                 'points' => 5,
                 'explanation' => $row['explanation'] ?? '',
-                'image_url' => ! empty($row['image']) && $slug ? "/storage/questions/{$slug}/{$row['image']}" : '',
+                'image_url' => $this->resolveImageValue($row['image'] ?? null, $slug) ?? '',
             ]);
         }
 

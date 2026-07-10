@@ -55,17 +55,35 @@
         </div>
     </x-ui.card>
 
-    {{-- REVIEW SOAL + PEMBAHASAN --}}
-    <div class="space-y-3">
+    {{-- REVIEW SOAL + PEMBAHASAN (tab per section, difilter client-side via Alpine) --}}
+    <div class="space-y-3" x-data="{ tab: '{{ $this->sections->first() }}' }">
         <h2 class="font-extrabold tracking-tight text-lg text-secondary">{{ __('Review Jawaban') }}</h2>
 
-        @foreach ($this->questions as $index => $question)
+        {{-- Tab bar section: sama gaya dengan ruang ujian --}}
+        @if ($this->sections->count() > 1)
+            <nav class="flex gap-1 overflow-x-auto border-b border-black/5">
+                @foreach ($this->sections as $key)
+                    <button type="button" @click="tab = '{{ $key }}'"
+                        class="relative shrink-0 px-4 py-2.5 text-sm font-bold transition-all cursor-pointer whitespace-nowrap"
+                        :class="tab === '{{ $key }}' ? 'text-primary-dark' : 'text-ink-muted hover:text-secondary'">
+                        {{ $this->sectionLabel($key) }}
+                        <span class="absolute inset-x-3 -bottom-px h-0.5 rounded-full brand-grad" x-show="tab === '{{ $key }}'"></span>
+                    </button>
+                @endforeach
+            </nav>
+        @endif
+
+        @php $sectionCounters = []; @endphp
+        @foreach ($this->questions as $question)
             @php
+                $sectionKey = $this->sectionKey($question->section);
+                $sectionCounters[$sectionKey] = ($sectionCounters[$sectionKey] ?? 0) + 1;
+                $numberInSection = $sectionCounters[$sectionKey];
                 $answer = $this->answersByQuestion->get($question->id);
                 $selected = $answer?->selected_option;
                 $isCorrect = (bool) $answer?->is_correct;
             @endphp
-            <x-ui.card wire:key="review-{{ $question->id }}" class="space-y-4">
+            <x-ui.card wire:key="review-{{ $question->id }}" class="space-y-4" x-show="tab === '{{ $sectionKey }}'">
                 <div class="flex items-start gap-3">
                     {{-- Ikon status literal: ok = benar, bad = salah, gridgrey = kosong --}}
                     <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white
@@ -81,7 +99,7 @@
 
                     <div class="flex-1 min-w-0 space-y-3">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-sm font-bold text-secondary">{{ __('Soal') }} {{ $index + 1 }}</span>
+                            <span class="text-sm font-bold text-secondary">{{ __('Soal No') }} {{ $numberInSection }}</span>
                             @if ($question->section)
                                 <span class="text-[11px] font-semibold uppercase tracking-wider text-primary-dark bg-primary/10 px-2 py-0.5 rounded-full">
                                     {{ $question->section }}
@@ -116,7 +134,12 @@
                                         {{ $isKey ? 'bg-ok text-white' : ($isPicked ? 'bg-bad text-white' : 'bg-surface-soft text-secondary') }}">
                                         {{ $letter }}
                                     </span>
-                                    <span class="text-ink/90">{{ $question->{$column} }}</span>
+                                    @if ($question->optionIsImage($question->{$column}))
+                                        <img src="{{ $question->{$column} }}" alt="{{ __('Opsi') }} {{ $letter }}"
+                                            loading="lazy" class="max-h-32 object-contain rounded-lg bg-white p-1">
+                                    @else
+                                        <span class="text-ink/90">{{ $question->{$column} }}</span>
+                                    @endif
                                     @if ($isPicked)
                                         <span class="ms-auto text-[11px] font-semibold uppercase tracking-wider {{ $isKey ? 'text-ok' : 'text-bad' }} shrink-0">
                                             {{ __('Pilihanmu') }}

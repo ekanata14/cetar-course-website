@@ -54,4 +54,14 @@ class Question extends Model
 
         return $this->image_url;
     }
+
+    /**
+     * Apakah nilai opsi jawaban berupa gambar (soal figural TIU) dan bukan teks.
+     * Opsi bergambar disimpan sebagai path storage "/storage/questions/...".
+     */
+    public function optionIsImage(?string $value): bool
+    {
+        return $value !== null
+            && (str_starts_with($value, '/storage/') || (bool) preg_match('/\.(png|jpe?g|gif|webp)$/i', $value));
+    }
 }

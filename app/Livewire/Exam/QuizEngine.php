@@ -7,6 +7,7 @@ use App\Actions\Quiz\SaveUserAnswer;
 use App\Actions\Quiz\StartQuizAttempt;
 use App\Actions\Quiz\SubmitQuizAttempt;
 use App\Enums\AttemptStatus;
+use App\Livewire\Exam\Concerns\HasSectionOrdering;
 use App\Models\Quiz;
 use App\Models\UserQuizAttempt;
 use Livewire\Attributes\Computed;
@@ -18,11 +19,16 @@ use Livewire\Component;
 #[Title('Ujian')]
 class QuizEngine extends Component
 {
+    use HasSectionOrdering;
+
     public Quiz $quiz;
 
     public UserQuizAttempt $attempt;
 
-    /** Index soal yang sedang ditampilkan (navigasi one-question-at-a-time) */
+    /** Section (tab) yang sedang aktif — mis. 'TWK'. Semua soal tetap satu sesi. */
+    public string $activeSection = '';
+
+    /** Index soal dalam section aktif (navigasi one-question-at-a-time per section) */
     public int $currentIndex = 0;
 
     /**
@@ -64,26 +70,66 @@ class QuizEngine extends Component
                 ],
             ])
             ->all();
+
+        // Tab awal: section pertama sesuai urutan baku (TWK → TIU → TKP → …)
+        $this->activeSection = $this->sections->first() ?? '';
     }
 
     /**
-     * Payload soal untuk sesi ujian.
+     * Payload soal untuk sesi ujian, diurutkan section baku lalu id.
      * PENTING: correct_answer & explanation sengaja TIDAK di-select agar
      * kunci jawaban tidak pernah bocor ke browser selama ujian berlangsung.
      */
     #[Computed]
     public function questions()
     {
-        return $this->quiz->questions()
-            ->orderBy('section')
-            ->orderBy('id')
-            ->get(['id', 'section', 'passage', 'text', 'option_a', 'option_b', 'option_c', 'option_d', 'option_e', 'points']);
+        $questions = $this->quiz->questions()
+            ->get(['id', 'section', 'passage', 'image_url', 'text', 'option_a', 'option_b', 'option_c', 'option_d', 'option_e', 'points']);
+
+        // Posisi tiap section (TWK=0, TIU=1, …) untuk pengurutan global
+        $position = $this->orderSections($questions->map(fn ($q) => $this->sectionKey($q->section)))->flip();
+
+        return $questions
+            ->sortBy(fn ($q) => [$position[$this->sectionKey($q->section)], $q->id])
+            ->values();
+    }
+
+    /** Daftar kunci section yang tersedia pada kuis ini, terurut baku (drive tab). */
+    #[Computed]
+    public function sections()
+    {
+        return $this->orderSections($this->questions->map(fn ($q) => $this->sectionKey($q->section)));
+    }
+
+    /** Soal pada section aktif saja — menyetir kartu, grid, penomoran & counter. */
+    #[Computed]
+    public function sectionQuestions()
+    {
+        return $this->questions
+            ->filter(fn ($q) => $this->sectionKey($q->section) === $this->activeSection)
+            ->values();
     }
 
     #[Computed]
     public function currentQuestion()
     {
-        return $this->questions[$this->currentIndex] ?? null;
+        return $this->sectionQuestions[$this->currentIndex] ?? null;
+    }
+
+    /** Jumlah soal terjawab pada section aktif (untuk counter sidebar). */
+    #[Computed]
+    public function sectionAnsweredCount(): int
+    {
+        return $this->sectionQuestions
+            ->filter(fn ($q) => ($this->answers[$q->id]['selected'] ?? null) !== null)
+            ->count();
+    }
+
+    /** Jumlah soal terjawab di seluruh sesi (untuk ringkasan sebelum submit). */
+    #[Computed]
+    public function answeredCount(): int
+    {
+        return collect($this->answers)->filter(fn ($a) => $a['selected'] !== null)->count();
     }
 
     /** Deadline absolut dalam epoch milidetik — dikonsumsi countdown timer Alpine */
@@ -122,9 +168,18 @@ class QuizEngine extends Component
 
     // --- NAVIGASI (state server agar konsisten saat re-render) ---
 
+    /** Pindah tab section; reset ke soal pertama section tersebut. */
+    public function setSection(string $section): void
+    {
+        if ($this->sections->contains($section)) {
+            $this->activeSection = $section;
+            $this->currentIndex = 0;
+        }
+    }
+
     public function goTo(int $index): void
     {
-        if ($index >= 0 && $index < $this->questions->count()) {
+        if ($index >= 0 && $index < $this->sectionQuestions->count()) {
             $this->currentIndex = $index;
         }
     }

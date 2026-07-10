@@ -11,7 +11,7 @@ use Illuminate\Database\Seeder;
 class QuizSeeder extends Seeder
 {
     /**
-     * Seed kuis contoh dengan soal bersection (TWK/TIU/TKP & SNBT),
+     * Seed kuis contoh dengan soal bersection (TWK/TIU/TKP),
      * materi belajar (teks/video/PDF), lalu susun roadmap belajar per paket:
      * Modul 1 = materi berurutan yang diakhiri try out.
      */
@@ -37,33 +37,12 @@ class QuizSeeder extends Seeder
         }
 
         // ==========================================
-        // 2. TRY OUT SNBT
-        // ==========================================
-        $snbtQuiz = Quiz::create([
-            'title' => 'Try Out UTBK-SNBT #1',
-            'description' => 'Simulasi UTBK-SNBT: Penalaran Umum dan Pengetahuan Kuantitatif (versi ringkas untuk demo).',
-            'duration_minutes' => 90,
-        ]);
-
-        foreach (['Penalaran Umum' => 6, 'Pengetahuan Kuantitatif' => 6] as $section => $count) {
-            Question::factory()->count($count)->create([
-                'quiz_id' => $snbtQuiz->id,
-                'section' => $section,
-            ]);
-        }
-
-        // ==========================================
-        // 3. Roadmap belajar per paket: Modul 1 berisi materi berurutan + try out di akhir
+        // 2. Roadmap belajar per paket: Modul 1 berisi materi berurutan + try out di akhir
         // ==========================================
         $cpnsPackage = Package::where('slug', 'pejuang-cpns-2026')->first();
-        $snbtPackage = Package::where('slug', 'juara-snbt-2026')->first();
 
         if ($cpnsPackage) {
             $this->seedRoadmap($cpnsPackage, $cpnsQuiz, 'SKD CPNS');
-        }
-
-        if ($snbtPackage) {
-            $this->seedRoadmap($snbtPackage, $snbtQuiz, 'UTBK-SNBT');
         }
     }
 

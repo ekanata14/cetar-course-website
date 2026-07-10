@@ -77,12 +77,16 @@
                             aria-label="Edit">
                             <x-lucide-pencil class="w-4 h-4" />
                         </button>
-                        <button type="button" wire:click="delete({{ $question->id }})"
-                            wire:confirm="{{ __('Hapus soal ini?') }}"
-                            class="p-2 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer"
-                            aria-label="Delete">
-                            <x-lucide-trash-2 class="w-4 h-4" />
-                        </button>
+                        <x-ui.confirm action="delete({{ $question->id }})"
+                            title="{{ __('Hapus Soal?') }}"
+                            message="{{ __('Soal ini akan dihapus permanen.') }}"
+                            confirm-label="{{ __('Hapus') }}">
+                            <button type="button"
+                                class="p-2 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer"
+                                aria-label="Delete">
+                                <x-lucide-trash-2 class="w-4 h-4" />
+                            </button>
+                        </x-ui.confirm>
                     </div>
                 </div>
             </x-ui.card>

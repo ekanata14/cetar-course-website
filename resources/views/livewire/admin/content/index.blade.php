@@ -67,12 +67,16 @@
                                         aria-label="Edit">
                                         <x-lucide-pencil class="w-4 h-4" />
                                     </button>
-                                    <button type="button" wire:click="delete({{ $content->id }})"
-                                        wire:confirm="{{ __('Hapus materi ini? Materi juga akan dilepas dari semua roadmap.') }}"
-                                        class="p-2 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer"
-                                        aria-label="Delete">
-                                        <x-lucide-trash-2 class="w-4 h-4" />
-                                    </button>
+                                    <x-ui.confirm action="delete({{ $content->id }})"
+                                        title="{{ __('Hapus Materi?') }}"
+                                        message="{{ __('Materi juga akan dilepas dari semua roadmap.') }}"
+                                        confirm-label="{{ __('Hapus') }}">
+                                        <button type="button"
+                                            class="p-2 rounded-lg text-bad hover:bg-bad-soft transition-all cursor-pointer"
+                                            aria-label="Delete">
+                                            <x-lucide-trash-2 class="w-4 h-4" />
+                                        </button>
+                                    </x-ui.confirm>
                                 </div>
                             </td>
                         </tr>

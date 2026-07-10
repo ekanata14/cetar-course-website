@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 class PackageSeeder extends Seeder
 {
     /**
-     * Seed paket produk utama (CPNS & SNBT) beserta tier harganya.
+     * Seed paket produk utama (CPNS) beserta tier harganya.
      */
     public function run(): void
     {
@@ -20,15 +20,6 @@ class PackageSeeder extends Seeder
                 'plans' => [
                     ['name' => '1 Bulan', 'duration_days' => 30, 'price' => 99000],
                     ['name' => '1 Tahun', 'duration_days' => 365, 'price' => 499000],
-                ],
-            ],
-            [
-                'name' => 'Juara SNBT 2026',
-                'slug' => 'juara-snbt-2026',
-                'description' => 'Persiapan UTBK-SNBT: Tes Potensi Skolastik, Literasi, dan Penalaran Matematika.',
-                'plans' => [
-                    ['name' => '1 Bulan', 'duration_days' => 30, 'price' => 79000],
-                    ['name' => '1 Tahun', 'duration_days' => 365, 'price' => 399000],
                 ],
             ],
         ];

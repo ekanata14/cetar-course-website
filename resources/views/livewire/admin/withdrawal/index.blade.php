@@ -33,16 +33,23 @@
                 </p>
 
                 <div class="flex items-center gap-2 shrink-0">
-                    <x-ui.button wire:click="approve({{ $withdrawal->id }})"
-                        wire:confirm="{{ __('Setujui penarikan ini? Pastikan kamu sudah/akan mentransfer dananya.') }}"
-                        class="!px-4 !py-2.5">
-                        <x-lucide-check class="w-4 h-4" /> {{ __('Setujui') }}
-                    </x-ui.button>
-                    <button type="button" wire:click="reject({{ $withdrawal->id }})"
-                        wire:confirm="{{ __('Tolak penarikan ini? Saldo akan dikembalikan ke user.') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-bad bg-bad-soft hover:bg-bad hover:text-white transition-all cursor-pointer">
-                        <x-lucide-x class="w-4 h-4" /> {{ __('Tolak') }}
-                    </button>
+                    <x-ui.confirm action="approve({{ $withdrawal->id }})" variant="primary"
+                        title="{{ __('Setujui Penarikan?') }}"
+                        message="{{ __('Pastikan kamu sudah/akan mentransfer dananya.') }}"
+                        confirm-label="{{ __('Setujui') }}">
+                        <x-ui.button class="!px-4 !py-2.5">
+                            <x-lucide-check class="w-4 h-4" /> {{ __('Setujui') }}
+                        </x-ui.button>
+                    </x-ui.confirm>
+                    <x-ui.confirm action="reject({{ $withdrawal->id }})"
+                        title="{{ __('Tolak Penarikan?') }}"
+                        message="{{ __('Saldo akan dikembalikan ke user.') }}"
+                        confirm-label="{{ __('Tolak') }}">
+                        <button type="button"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-bad bg-bad-soft hover:bg-bad hover:text-white transition-all cursor-pointer">
+                            <x-lucide-x class="w-4 h-4" /> {{ __('Tolak') }}
+                        </button>
+                    </x-ui.confirm>
                 </div>
             </x-ui.card>
         @empty

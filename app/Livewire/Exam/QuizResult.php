@@ -3,6 +3,7 @@
 namespace App\Livewire\Exam;
 
 use App\Enums\AttemptStatus;
+use App\Livewire\Exam\Concerns\HasSectionOrdering;
 use App\Models\UserQuizAttempt;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -13,6 +14,8 @@ use Livewire\Component;
 #[Title('Hasil Ujian')]
 class QuizResult extends Component
 {
+    use HasSectionOrdering;
+
     public UserQuizAttempt $attempt;
 
     public function mount(UserQuizAttempt $attempt): void
@@ -37,10 +40,23 @@ class QuizResult extends Component
     #[Computed]
     public function questions()
     {
-        return $this->attempt->quiz->questions()
-            ->orderBy('section')
+        $questions = $this->attempt->quiz->questions()
             ->orderBy('id')
             ->get();
+
+        // Urutkan section baku (TWK → TIU → TKP → …) agar tab & review konsisten
+        $position = $this->orderSections($questions->map(fn ($q) => $this->sectionKey($q->section)))->flip();
+
+        return $questions
+            ->sortBy(fn ($q) => [$position[$this->sectionKey($q->section)], $q->id])
+            ->values();
+    }
+
+    /** Kunci section terurut baku — menyetir tab review di halaman hasil. */
+    #[Computed]
+    public function sections()
+    {
+        return $this->orderSections($this->questions->map(fn ($q) => $this->sectionKey($q->section)));
     }
 
     #[Computed]
