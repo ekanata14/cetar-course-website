@@ -62,11 +62,18 @@ def call_claude(text: str) -> list:
     out = re.sub(r'^```(?:json)?\s*', '', out)
     out = re.sub(r'\s*```$', '', out)
 
-    start, end = out.find('['), out.rfind(']')
-    if start == -1 or end == -1:
+    start = out.find('[')
+    if start == -1:
         raise ValueError(f'Tidak menemukan JSON array. Output awal: {out[:400]}')
 
-    return json.loads(out[start:end + 1])
+    # raw_decode berhenti di akhir array pertama yang valid, tidak peduli
+    # ada teks/JSON tambahan setelahnya (model kadang menambahkan catatan).
+    try:
+        result, _ = json.JSONDecoder().raw_decode(out, start)
+    except json.JSONDecodeError as e:
+        raise ValueError(f'JSON tidak valid: {e}. Output awal: {out[:400]}') from e
+
+    return result
 
 
 def chunks_of(text: str, max_chars: int = 24000) -> list:

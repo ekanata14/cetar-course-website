@@ -31,6 +31,15 @@ class TryOutSeeder extends Seeder
 
         $tryouts = [
             ['slug' => 'cpns-paket-01', 'title' => 'CPNS Paket 01', 'duration' => 100],
+            ['slug' => 'cpns-paket-02', 'title' => 'CPNS Paket 02', 'duration' => 40],
+            ['slug' => 'cpns-paket-03', 'title' => 'CPNS Paket 03', 'duration' => 40],
+            ['slug' => 'cpns-paket-04', 'title' => 'CPNS Paket 04', 'duration' => 40],
+            ['slug' => 'cpns-paket-05', 'title' => 'CPNS Paket 05', 'duration' => 40],
+            ['slug' => 'cpns-paket-06', 'title' => 'CPNS Paket 06', 'duration' => 40],
+            ['slug' => 'cpns-paket-07', 'title' => 'CPNS Paket 07', 'duration' => 40],
+            ['slug' => 'cpns-paket-08', 'title' => 'CPNS Paket 08', 'duration' => 40],
+            ['slug' => 'cpns-paket-09', 'title' => 'CPNS Paket 09', 'duration' => 40],
+            ['slug' => 'cpns-paket-10', 'title' => 'CPNS Paket 10', 'duration' => 40],
         ];
 
         foreach ($tryouts as $tryout) {
